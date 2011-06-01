@@ -93,7 +93,7 @@ class BlogPost(db.Model):
   def tags_hash(self):
     """ Hash of tags only, used by TagCloudContentGenerator
     @author Tom Allen """
-    val = (self.normalized_tags)
+    val = (self.tags)
     return hashlib.sha1(str(val)).hexdigest()
 
   def publish(self):
@@ -221,18 +221,21 @@ class VersionInfo(db.Model):
 
 class TagCounter(db.Model):
   tagname = db.StringProperty(required=True)
-  count = db.IntegerProperty(required=True, default=0)
+  tagcount = db.IntegerProperty(required=True, default=0)
 
   @property
-  def tag_url_and_count(self):
-      return (self.tagname, utils.slugify(self.tagname.lower()), self.count)
+  def tag_and_count(self):
+      return (utils.slugify(self.tagname.lower()), self.tagcount)
       
   @classmethod
   def create_for_post(cls, post):
-    for tag in post.normalized_tags(post.tags):
-      inst = TagCounter.get_by_key_name(key_names=tag)
+    import logging
+    logging.debug('TagCounter.create_for_post in models.py, normalized_tags = ' + normalized_tags)
+    for tag in post.normalized_tags:
+      logging.debug('TagCounter.create_for_post in models.py, tag = ' + tag)
+      inst = TagCounter.get_by_key_name(key_names=str(tag))
       if inst is None:
-        inst = TagCounter(key_name=tag, tagname=tag, count=0)
-      inst.count += 1
+        inst = TagCounter(key_name=str(tag), tagname=str(tag), tagcount=0)
+      inst.tagcount += 1
       inst.put()
       

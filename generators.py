@@ -378,8 +378,9 @@ class TagCloudContentGenerator(ContentGenerator):
 
   @classmethod
   def get_resource_list(cls, post):
-    """ Return the tags for this post. """
-    return post.normalized_tags
+    """ Return the id of this post, because we're going to update the counts
+    for all its tags in the one go. """
+    return [post.key().id()]
 
   @classmethod
   def get_etag(cls, post):
@@ -387,23 +388,30 @@ class TagCloudContentGenerator(ContentGenerator):
 
   @classmethod
   def generate_resource(cls, post, resource):
-    """ Updates the tag cloud in the static serving system. """
-    from models import TagCounter
+    """ Updates the counts for each tag in a given post. """
+    import models
+    # resource is the ID of the post.
+    if not post:
+      post = models.BlogPost.get_by_id(resource)
+    else:
+      assert resource == post.key().id()
     
-    for tag in resource:
-        tag_counter = TagCounter.get_by_key_name( key_names=tag )
-        if tag_counter is None:
-          tag_counter = TagCounter(key_name=tag, tagname=tag, count=0)
-        tag_counter.count += 1
-        tag_counter.put()
+    import logging
+    for tag in post.normalized_tags:
+      logging.debug('TagCloudContentGenerator.generate_resource in generators.py, tag = ' + tag)
+      tag_counter = models.TagCounter.get_by_key_name( key_names=str(tag) )
+      if tag_counter is None:
+        tag_counter = models.TagCounter(key_name=str(tag), tagname=str(tag), tagcount=0)
+      tag_counter.tagcount += 1
+      tag_counter.put()
  
    # Build triples of (tag, url, count) by extract the 'tag_cloud_max_size' most popular tags.   
-    q = TagCounter.all().order('-count')
-    tag_pairs_and_counts = list(itertools.islice((x.tag_url_and_count for x in q if x.count != 0), config.tag_cloud_max_size))
+    q = models.TagCounter.all().order('-tagcount')
+    tags_and_counts = list(itertools.islice((x.tag_and_count for x in q if x.tagcount != 0), config.tag_cloud_max_size))
     
     # Pass these tag pairs and counts as template variables to the tag cloud template.
     template_vals = {
-      'tag_pairs_and_counts': tag_pairs_and_counts,
+      'tags_and_counts': tags_and_counts,
     }    
     rendered = utils.render_template("tagcloud.html", template_vals)
     
