@@ -23,11 +23,17 @@ else:
 
 
 def slugify(s):
+  """ takes care of converting the post title into something suitable for a URL.
+  It replaces non alphanumeric characters with hyphens, then strips out any
+  leading or trailing hyphens. """
   s = unicodedata.normalize('NFKD', s).encode('ascii', 'ignore')
   return re.sub('[^a-zA-Z0-9-]+', '-', s).strip('-')
 
 
 def format_post_path(post, num):
+  """ generates the path component of a URL for the post:
+  It slugifies the post's title, optionally appends a unique number, and then
+  formats the URL using the format string defined in the config file. """
   slug = slugify(post.title)
   if num > 0:
     slug += "-" + str(num)

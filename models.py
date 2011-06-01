@@ -88,6 +88,13 @@ class BlogPost(db.Model):
   def summary_hash(self):
     val = (self.title, self.summary, self.tags, self.published)
     return hashlib.sha1(str(val)).hexdigest()
+    
+  @property
+  def tags_hash(self):
+    """ Hash of tags only, used by TagCloudContentGenerator
+    @author Tom Allen """
+    val = (self.normalized_tags)
+    return hashlib.sha1(str(val)).hexdigest()
 
   def publish(self):
     regenerate = False
@@ -95,6 +102,8 @@ class BlogPost(db.Model):
       num = 0
       content = None
       while not content:
+        """ Tries to find a unique URL for this post, and adds the content
+        to the datastore when it finds one. """
         path = utils.format_post_path(self, num)
         content = static.add(path, '', config.html_mime_type)
         num += 1
@@ -106,6 +115,28 @@ class BlogPost(db.Model):
 
     BlogDate.create_for_post(self)
 
+    """ For every type of generated content (indexes, tags, etc) dependent
+    upon this particular post:
+    i) Fetch the current list of resources and etag from the current
+    ContentGenerator
+    ii) Fetch the stored list of resources and etag from self.deps
+    iii) If the etag has changed, we need to regenerate all resources - so we
+    set to_regenerate to the union of the old and new resources.
+    iv) If the etag has not changed, we only need to regenerate added or
+    removed resources - so we set to_regenerate to the symmetric difference of
+    the old and new resources.
+    v) For each resource that needs regenerating, we call generate_resource().
+    vi) Finally, we update the BlogPost's list of deps with the new set of
+    resources and etag.
+    
+    Later edit: The only change here is that we check if the ContentGenerator
+    permits deferred execution. If it doesn't, we execute generate_resource
+    as normal, but if it does, we call deferred.defer for each changed
+    dependency.
+    
+    (Some of this sequence is now encapsulated in other functions, but it's
+    doing roughly the same thing still.)
+    """
     for generator_class, deps in self.get_deps(regenerate=regenerate):
       for dep in deps:
         if generator_class.can_defer:
@@ -185,3 +216,8 @@ class VersionInfo(db.Model):
   @property
   def bloggart_version(self):
     return (self.bloggart_major, self.bloggart_minor, self.bloggart_rev)
+
+#class TagCounter(db.Model)
+#  tag = db.StringProperty(required=True)
+#  url = db.LinkProperty(required=True)
+#  count = db.IntegerProperty(required=True, default=0)

@@ -24,12 +24,22 @@ class ContentGenerator(object):
 
   @classmethod
   def name(cls):
+    """ returns a unique name for the ContentGenerator.
+    By default, this is the name of the class. """
     return cls.__name__
 
   @classmethod
   def get_resource_list(cls, post):
-    """Returns a list of resources for the given post.
-
+    """Returns a list of resources (dependencies) for the given post.
+    Takes a BlogPost and is expected to return a list of strings representing
+    resources this post will appear in. For example, if we were implementing
+    tags, this would return a list of tags in the post: ["foo", "bar", "baz"]
+    
+    TomNote: This is described really badly by the original author, but it
+    intended to be read as "this post affects these resources", and is used
+    later to say "for all resources that were affected by this post, please
+    regenerate your content now" and similar things.
+    
     Args:
       post: A BlogPost entity.
     Returns:
@@ -67,6 +77,10 @@ class PostContentGenerator(ContentGenerator):
 
   @classmethod
   def get_resource_list(cls, post):
+    """ Return the path of this post - because the only PostContent resource
+    affected by this post... is this post itself. i.e. When this post changes
+    (is edited, for example), the static content that represents it and is
+    stored in the data store should be regenerated. """
     return [post.key().id()]
 
   @classmethod
@@ -92,6 +106,8 @@ class PostContentGenerator(ContentGenerator):
 
   @classmethod
   def generate_resource(cls, post, resource, action='post'):
+    """ Updates the post in the static serving system.
+    Also handles deleting posts if action=='delete' """
     import models
     if not post:
       post = models.BlogPost.get_by_id(resource)
@@ -141,6 +157,7 @@ class PostPrevNextContentGenerator(PostContentGenerator):
 generator_list.append(PostPrevNextContentGenerator)
 
 class ListingContentGenerator(ContentGenerator):
+  """ ListingContent includes the index, tags, etc """
   path = None
   """The path for listing pages."""
 
@@ -149,6 +166,8 @@ class ListingContentGenerator(ContentGenerator):
 
   @classmethod
   def get_etag(cls, post):
+    """ The hash only depends on the summary (title, tags, summary, date),
+    not the body content. """
     return post.summary_hash
 
   @classmethod
@@ -163,6 +182,13 @@ class ListingContentGenerator(ContentGenerator):
 
   @classmethod
   def generate_resource(cls, post, resource, pagenum=1, start_ts=None):
+    """ Fetches a list of the N most recent blog posts, and renders the
+    listing.html template with them - storing the result to the root path
+    (or offset if not the first N posts).
+    
+    To clarify, the output of the listing template with the template values is
+    stored in the static store at a location whose key is this path.
+    """
     import models
     q = models.BlogPost.all().order('-published')
     q.filter('published <', start_ts or datetime.datetime.max)
@@ -203,6 +229,7 @@ class IndexContentGenerator(ListingContentGenerator):
 
   @classmethod
   def get_resource_list(cls, post):
+    """ The only IndexContent that depends on this post is the index itself. """
     return ["index"]
 generator_list.append(IndexContentGenerator)
 
@@ -343,3 +370,57 @@ class PageContentGenerator(ContentGenerator):
       rendered = utils.render_template('pages/%s' % (page.template,),
                                        template_vals)
       static.set(page.path, rendered, config.html_mime_type)
+
+#class TagCloudContentGenerator(ContentGenerator):
+#  """ContentGenerator for tag clouds.
+#  @author Tom Allen
+#  """
+#
+#  @classmethod
+#  def get_resource_list(cls, post):
+#    """ Return the tags for this post. """
+#    return post.normalized_tags
+#
+#  @classmethod
+#  def get_etag(cls, post):
+#    return post.tags_hash # Uses tags only to generate the hash.
+#
+#  """
+#  @classmethod
+#  def _filter_query(cls, resource, q):
+#    q.filter('normalized_tags =', resource)
+#  """
+#
+#  @classmethod
+#  def generate_resource(cls, post, resource):
+#    """ Updates the tag cloud in the static serving system. """
+#    
+#    for tag in resource:
+#      def tx():
+#        import models
+#        tag_counter = TagCounter.get_by_key_name( tag )
+#        if tag_counter is None:
+#          tag_counter = TagCounter(key_name=tag)
+#        counter.count += 1
+#        counter.tag = tag
+#        counter.url = utils.slugify( tag )
+#        counter.put()
+#      db.run_in_transaction(tx)
+#    
+#    """ I need to create a new model thingy earlier and add to its count
+#    whenever a new post is made. Count up front, rather than trying to count
+#    when displaying. Thus, this function would probably ignore the resource
+#    variable, because it's going to access another entity instead. We can still
+#    recreate the tag cloud HTML via this static method, but don't try to query
+#    all blog posts and count the tags here..."""
+#    
+#    # Build triples of (tag, url, count)
+#    tag_pairs_and_counts = [];
+#    
+#    template_vals = {
+#      'tag_pairs_and_counts': tag_pairs_and_counts,
+#    }
+#    
+#    rendered = utils.render_template("tagcloud.html", template_vals)
+#    static.set('/tagcloud.html', rendered, config.html_mime_type)
+#generator_list.append(TagCloudContentGenerator)

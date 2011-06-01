@@ -104,7 +104,7 @@ def add(path, body, content_type, indexed=True, **kwargs):
     if StaticContent.get_by_key_name(path):
       return None
     return set(path, body, content_type, indexed, **kwargs)
-  return db.run_in_transaction(_tx)
+  return db.run_in_transaction(_tx) # Runs the _tx function in a single database transaction - if anything raises an exception, the whole transaction is rolled back.
 
 def remove(path):
   """Deletes a StaticContent.
@@ -121,6 +121,14 @@ def remove(path):
   return db.run_in_transaction(_tx)
 
 class StaticContentHandler(webapp.RequestHandler):
+  """ The webapp request handler.
+    
+    get() checks that the request is for paths to do with the blog part of the
+    website (i.e. if blog is at url.com/blog only requests with /blog). It
+    then looks for conditional request headers (last-modified, etags) and
+    only calls output_content() with serve==true if it's appropriate to serve
+    the content. output_content() then actually writes the content.body out.
+  """
   def output_content(self, content, serve=True):
     if content.content_type:
       self.response.headers['Content-Type'] = content.content_type

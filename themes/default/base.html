@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <title>{% block title %}Bloggart{% endblock %}</title>
+  <title>{% block title %}{{config.blog_name}}{% endblock %}</title>
   {% block style %}
   <link rel="stylesheet" type="text/css" media="screen" href="{{config.url_prefix}}/static/{{config.theme}}/css/screen.css" />
   {% endblock %}
@@ -30,6 +30,7 @@
 			<ul>
 				<li{% ifequal generator_class "IndexContentGenerator" %} id="current"{% endifequal %}><a href="{{config.url_prefix}}/">Home</a></li>
 				<li{% ifequal generator_class "ArchiveIndexContentGenerator" %} id="current"{% else %}{% ifequal generator_class "ArchivePageContentGenerator" %} id="current"{% endifequal %}{% endifequal %}><a href="{{config.url_prefix}}/archive/">Archive</a></li>
+				<li><a href="/about">About {{config.blog_name}}</a></li>
         {% block menu %}{% endblock %}
 			</ul>
 		</div>		
@@ -51,6 +52,19 @@
       {% block body %}{% endblock %}
 		</div>
 		<div id="left-columns" class="grid_4">
+		  
+		<!-- Include the tag link cloud. -->
+        <div class="sidemenu">
+          <h3>Tag Cloud</h3>
+		  coming soon...
+        </div>
+		
+		<!-- Include the author link cloud. -->
+		<div class="sidemenu">
+          <h3>Author Cloud</h3>
+		  coming soon...
+        </div>
+		
       {% for sidebar in config.sidebars %}
         <div class="sidemenu">
           <h3>{{sidebar.0}}</h3>
@@ -108,9 +122,7 @@
 	        {{ config.feed_proxy }}
 	      {% else %}
 	        {{config.url_prefix}}/feeds/atom.xml
-	      {% endif %}">Atom</a> |
-				<a href="http://jigsaw.w3.org/css-validator/check/referer">CSS</a> | 
-		   	<a href="http://validator.w3.org/check/referer">XHTML</a>
+	      {% endif %}">Atom Feed</a>
 			</p>
 		</div>	
 	</div>

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}TagCloud - {{config.blog_name}}{% endblock %}
+{% block body %}
+
+    <div class="sidemenu">
+        <h3>Tag Cloud</h3>
+        {% for tag in tag_pairs_and_counts %}
+          <a href="{{config.url_prefix}}/tag/{{tag.1|escape}}">{{tag.0|escape}}({{tag.2|escape}})</a>{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    </div>
+
+{% endblock %}

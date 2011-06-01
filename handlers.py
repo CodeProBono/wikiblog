@@ -31,6 +31,8 @@ class PostForm(djangoforms.ModelForm):
 
 
 def with_post(fun):
+  """ Decorator function that attaches to methods that require an optional
+  post ID. Loads the relevant BlogPost object. """
   def decorate(self, post_id=None):
     post = None
     if post_id:
@@ -58,6 +60,7 @@ class BaseHandler(webapp.RequestHandler):
 
 class AdminHandler(BaseHandler):
   def get(self):
+    """ Lists start to count worth of posts. """
     offset = int(self.request.get('start', 0))
     count = int(self.request.get('count', 20))
     posts = models.BlogPost.all().order('-published').fetch(count, offset)
@@ -74,10 +77,17 @@ class AdminHandler(BaseHandler):
 
 class PostHandler(BaseHandler):
   def render_form(self, form):
+    """ accepts a form, and uses render_to_response to render a page containing the form. """
     self.render_to_response("edit.html", {'form': form})
 
   @with_post
   def get(self, post):
+    """ generates the page with a blank form when it's requested by the user's browser with a GET request.
+    If no post ID is supplied (via the decorator function with_post), post
+    is None, and the form works as it used to. If a post ID is supplied,
+    the post variable contains the post to be edited, and the form pre-fills
+    all the relevant information. The same applies to the post() method.
+    """
     self.render_form(PostForm(
         instance=post,
         initial={
@@ -87,6 +97,12 @@ class PostHandler(BaseHandler):
 
   @with_post
   def post(self, post):
+    """ accepts form submissions and checks them for validity.
+    If the form isn't valid, it shows the user the submission form again;
+    Django takes care of including error messages and filling out values
+    that the user already entered. If the form is valid, it saves the form,
+    creating a new entity. It then calls .publish() on the new BlogPost
+    entity. """
     form = PostForm(data=self.request.POST, instance=post,
                     initial={'draft': post and post.published is None})
     if form.is_valid():

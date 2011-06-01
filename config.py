@@ -1,14 +1,14 @@
 # Name of the blog
-blog_name = 'My Blog'
+blog_name = 'WikiBlog'
 
 # Your name (used for copyright info)
-author_name = 'the author'
+author_name = 'Code Pro Bono'
 
 # (Optional) slogan
-slogan = 'This is my blog'
+slogan = 'Everyone should blog...'
 
 # The hostname this site will primarially serve off (used for Atom feeds)
-host = 'localhost:8080'
+host = 'wikiblog.jugglethis.net'
 
 # Selects the theme to use. Theme names correspond to directories under
 # the 'themes' directory, containing templates and static content.
@@ -31,13 +31,9 @@ post_path_format = '/%(year)d/%(month)02d/%(slug)s'
 # enough, you can edit themes/default/base.html instead.
 sidebars = [
   ('Blogroll', [
-    '<a href="http://blog.notdot.net/">Nick Johnsonz</a>',
-    '<a href="http://www.billkatz.com/">Bill Katz</a>',
-    '<a href="http://www.codinghorror.com/blog/">Coding Horror</a>',
-    '<a href="http://craphound.com/">Craphound</a>',
-    '<a href="http://www.neopythonic.blogspot.com/">Neopythonic</a>',
-    '<a href="http://www.schneier.com/blog/">Schneier on Security</a>',
-  ]),
+	'<a href="/2011/05/WikiBlog-Roadmap">WikiBlog Roadmap</a>',
+    '<a href="http://blog.notdot.net/2009/10/Writing-a-blog-system-on-App-Engine">Nick Johnsonz\'s Bloggart</a>',
+  ])
 ]
 
 # Number of entries per page in indexes.
@@ -48,7 +44,7 @@ html_mime_type = "text/html; charset=utf-8"
 
 # To use disqus for comments, set this to the 'short name' of the disqus forum
 # created for the purpose.
-disqus_forum = None
+disqus_forum = "jugglethis-wikiblog"
 
 # Length (in words) of summaries, by default
 summary_length = 200
