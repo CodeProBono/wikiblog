@@ -230,7 +230,7 @@ class TagCounter(db.Model):
   @classmethod
   def create_for_post(cls, post):
     import logging
-    logging.debug('TagCounter.create_for_post in models.py, normalized_tags = ' + normalized_tags)
+    logging.debug('TagCounter.create_for_post in models.py, normalized_tags = ' + post.normalized_tags)
     for tag in post.normalized_tags:
       logging.debug('TagCounter.create_for_post in models.py, tag = ' + tag)
       inst = TagCounter.get_by_key_name(key_names=str(tag))
