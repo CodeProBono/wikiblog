@@ -1,5 +1,5 @@
-application: bloggart-demo
-version: live
+application: jugglethis-wikiblog
+version: experimental
 runtime: python
 api_version: 1
 

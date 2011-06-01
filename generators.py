@@ -371,56 +371,42 @@ class PageContentGenerator(ContentGenerator):
                                        template_vals)
       static.set(page.path, rendered, config.html_mime_type)
 
-#class TagCloudContentGenerator(ContentGenerator):
-#  """ContentGenerator for tag clouds.
-#  @author Tom Allen
-#  """
-#
-#  @classmethod
-#  def get_resource_list(cls, post):
-#    """ Return the tags for this post. """
-#    return post.normalized_tags
-#
-#  @classmethod
-#  def get_etag(cls, post):
-#    return post.tags_hash # Uses tags only to generate the hash.
-#
-#  """
-#  @classmethod
-#  def _filter_query(cls, resource, q):
-#    q.filter('normalized_tags =', resource)
-#  """
-#
-#  @classmethod
-#  def generate_resource(cls, post, resource):
-#    """ Updates the tag cloud in the static serving system. """
-#    
-#    for tag in resource:
-#      def tx():
-#        import models
-#        tag_counter = TagCounter.get_by_key_name( tag )
-#        if tag_counter is None:
-#          tag_counter = TagCounter(key_name=tag)
-#        counter.count += 1
-#        counter.tag = tag
-#        counter.url = utils.slugify( tag )
-#        counter.put()
-#      db.run_in_transaction(tx)
-#    
-#    """ I need to create a new model thingy earlier and add to its count
-#    whenever a new post is made. Count up front, rather than trying to count
-#    when displaying. Thus, this function would probably ignore the resource
-#    variable, because it's going to access another entity instead. We can still
-#    recreate the tag cloud HTML via this static method, but don't try to query
-#    all blog posts and count the tags here..."""
-#    
-#    # Build triples of (tag, url, count)
-#    tag_pairs_and_counts = [];
-#    
-#    template_vals = {
-#      'tag_pairs_and_counts': tag_pairs_and_counts,
-#    }
-#    
-#    rendered = utils.render_template("tagcloud.html", template_vals)
-#    static.set('/tagcloud.html', rendered, config.html_mime_type)
-#generator_list.append(TagCloudContentGenerator)
+class TagCloudContentGenerator(ContentGenerator):
+  """ContentGenerator for tag clouds.
+  @author Tom Allen
+  """
+
+  @classmethod
+  def get_resource_list(cls, post):
+    """ Return the tags for this post. """
+    return post.normalized_tags
+
+  @classmethod
+  def get_etag(cls, post):
+    return post.tags_hash # Uses tags only to generate the hash.
+
+  @classmethod
+  def generate_resource(cls, post, resource):
+    """ Updates the tag cloud in the static serving system. """
+    from models import TagCounter
+    
+    for tag in resource:
+        tag_counter = TagCounter.get_by_key_name( key_names=tag )
+        if tag_counter is None:
+          tag_counter = TagCounter(key_name=tag, tagname=tag, count=0)
+        tag_counter.count += 1
+        tag_counter.put()
+ 
+   # Build triples of (tag, url, count) by extract the 'tag_cloud_max_size' most popular tags.   
+    q = TagCounter.all().order('-count')
+    tag_pairs_and_counts = list(itertools.islice((x.tag_url_and_count for x in q if x.count != 0), config.tag_cloud_max_size))
+    
+    # Pass these tag pairs and counts as template variables to the tag cloud template.
+    template_vals = {
+      'tag_pairs_and_counts': tag_pairs_and_counts,
+    }    
+    rendered = utils.render_template("tagcloud.html", template_vals)
+    
+    # Store the tagcloud HTML in the static store.
+    static.set('/tagcloud.html', rendered, config.html_mime_type)
+generator_list.append(TagCloudContentGenerator)

@@ -39,6 +39,9 @@ sidebars = [
 # Number of entries per page in indexes.
 posts_per_page = 10
 
+# Maximum number of items in the tag cloud
+tag_cloud_max_size = 100
+
 # The mime type to serve HTML files as.
 html_mime_type = "text/html; charset=utf-8"
 

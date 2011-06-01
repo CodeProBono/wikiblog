@@ -113,7 +113,9 @@ class BlogPost(db.Model):
       # chronologically previous and next page.
       regenerate = True
 
+    # Create BlogDate and TagCounter objects given the data for this post.
     BlogDate.create_for_post(self)
+    TagCounter.create_for_post(self)
 
     """ For every type of generated content (indexes, tags, etc) dependent
     upon this particular post:
@@ -217,7 +219,20 @@ class VersionInfo(db.Model):
   def bloggart_version(self):
     return (self.bloggart_major, self.bloggart_minor, self.bloggart_rev)
 
-#class TagCounter(db.Model)
-#  tag = db.StringProperty(required=True)
-#  url = db.LinkProperty(required=True)
-#  count = db.IntegerProperty(required=True, default=0)
+class TagCounter(db.Model):
+  tagname = db.StringProperty(required=True)
+  count = db.IntegerProperty(required=True, default=0)
+
+  @property
+  def tag_url_and_count(self):
+      return (self.tagname, utils.slugify(self.tagname.lower()), self.count)
+      
+  @classmethod
+  def create_for_post(cls, post):
+    for tag in post.normalized_tags(post.tags):
+      inst = TagCounter.get_by_key_name(key_names=tag)
+      if inst is None:
+        inst = TagCounter(key_name=tag, tagname=tag, count=0)
+      inst.count += 1
+      inst.put()
+      
