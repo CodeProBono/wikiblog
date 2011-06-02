@@ -152,6 +152,7 @@ class PreviewHandler(BaseHandler):
 
 class RegenerateHandler(BaseHandler):
   def post(self):
+    deferred.defer(post_deploy.TagCloudRegenerator().regenerate) # Added by Tom.
     deferred.defer(post_deploy.PostRegenerator().regenerate)
     deferred.defer(post_deploy.PageRegenerator().regenerate)
     deferred.defer(post_deploy.try_post_deploy, force=True)

@@ -1,7 +1,10 @@
 application: jugglethis-wikiblog
-version: experimental
+version: live
 runtime: python
 api_version: 1
+
+builtins:
+- datastore_admin: on
 
 skip_files: |
  ^(.*/)?(

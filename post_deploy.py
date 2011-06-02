@@ -46,8 +46,15 @@ class PageRegenerator(object):
     if len(pages) == batch_size:
       deferred.defer(self.regenerate, batch_size, pages[-1].created)
 
-post_deploy_tasks = []
+class TagCloudRegenerator(object):
+  def regenerate(self):
+    import logging
+    logging.debug("TagCloudRegenerator is resetting count for all tags.")
+    from google.appengine.ext import db
+    # Reset every tag counter.
+    db.delete(models.TagCounter.all())
 
+post_deploy_tasks = []
 
 def generate_static_pages(pages):
   def generate(previous_version):
