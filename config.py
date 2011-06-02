@@ -50,7 +50,7 @@ disqus_forum = "jugglethis-wikiblog"
 summary_length = 200
 
 # If you want to use Google Analytics, enter your 'web property id' here
-analytics_id = None
+analytics_id = 'UA-23680950'
 
 # If you want to use PubSubHubbub, supply the hub URL to use here.
 hubbub_hub_url = 'http://pubsubhubbub.appspot.com/'
@@ -64,7 +64,7 @@ google_sitemap_ping = True
 # an html file' method, then set the NAME of the file below.
 # Note that you do not need to download the file provided - just enter its name
 # here.
-google_site_verification = None
+google_site_verification = 'google256b784a724c4180.html'
 
 # Default markup language for entry bodies (defaults to html).
 default_markup = 'html'
