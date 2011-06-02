@@ -37,7 +37,7 @@ posts_per_page = 10
 # Maximum number of items in the tag cloud
 tag_cloud_max_size = 100
 tag_cloud_min_fontsize = 0.75 # Min font size in tag clouds (em)
-tag_cloud_max_fontsize = 3.0 # Max font size in tag clouds (em)
+tag_cloud_max_fontsize = 2.0 # Max font size in tag clouds (em)
 
 # The mime type to serve HTML files as.
 html_mime_type = "text/html; charset=utf-8"
