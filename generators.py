@@ -117,8 +117,14 @@ class PostContentGenerator(ContentGenerator):
     if action == 'delete':
       static.remove(post.path)
       return
+      
+    # Grab the tagcloud content from the static store and add to 
+    # the template_vals so base.html can use it.
+    tagcloud = static.get('tagcloud').body      
+      
     template_vals = {
         'post': post,
+        'tagcloud': tagcloud
     }
     prev, next = cls.get_prev_next(post)
     if prev is not None:
@@ -144,8 +150,14 @@ class PostPrevNextContentGenerator(PostContentGenerator):
     post = models.BlogPost.get_by_id(resource)
     if post is None:
       return
+     
+    # Grab the tagcloud content from the static store and add to 
+    # the template_vals so base.html can use it.
+    tagcloud = static.get('tagcloud').body     
+     
     template_vals = {
         'post': post,
+        'tagcloud': tagcloud,
     }
     prev, next = cls.get_prev_next(post)
     if prev is not None:
@@ -316,10 +328,15 @@ class ArchiveIndexContentGenerator(ContentGenerator):
     for date in dates:
       date_struct.setdefault(date.year, []).append(date)
 
+    # Grab the tagcloud content from the static store and add to 
+    # the template_vals so base.html can use it.
+    tagcloud = static.get('tagcloud').body
+
     str = utils.render_template("archive.html", {
       'generator_class': cls.__name__,
       'dates': dates,
       'date_struct': date_struct.values(),
+      'tagcloud': tagcloud,
     })
     static.set('/archive/', str, config.html_mime_type)
 generator_list.append(ArchiveIndexContentGenerator)
@@ -372,8 +389,13 @@ class PageContentGenerator(ContentGenerator):
     if action == 'delete':
       static.remove(page.path)
     else:
+      # Grab the tagcloud content from the static store and add to 
+      # the template_vals so base.html can use it.
+      tagcloud = static.get('tagcloud').body
+    
       template_vals = {
           'page': page,
+          'tagcloud': tagcloud,
       }
       rendered = utils.render_template('pages/%s' % (page.template,),
                                        template_vals)

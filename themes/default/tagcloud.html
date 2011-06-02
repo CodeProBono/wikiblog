@@ -1,6 +1,6 @@
 <div class="sidemenu">
   <h3>Tag Cloud</h3>
   {% for tag in tagcloud %}
-    <div style="font-size: {{tag.fontsize}}em;"><a href="{{config.url_prefix}}/tag/{{tag.url|escape}}">{{tag.tag|escape}}</a></div>{% if not forloop.last %} {% endif %}
+    <span style="font-size: {{tag.fontsize}}em;"><a href="{{config.url_prefix}}/tag/{{tag.url|escape}}">{{tag.tag|escape}}</a></span>{% if not forloop.last %} {% endif %}
   {% endfor %}
 </div>
