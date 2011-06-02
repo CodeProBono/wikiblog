@@ -11,11 +11,6 @@ import models
 import post_deploy
 import utils
 
-# Set Django version properly.
-os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
-from google.appengine.dist import use_library
-use_library('django', '1.2')
-
 from django import newforms as forms
 from google.appengine.ext.db import djangoforms
 

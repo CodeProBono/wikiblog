@@ -206,11 +206,19 @@ class ListingContentGenerator(ContentGenerator):
     prev_page = _get_path() % path_args
     path_args['pagenum'] = pagenum + 1
     next_page = cls.path % path_args
+    
+    # Grab the tagcloud content from the static store and add to 
+    # the template_vals so base.html can use it.
+    tagcloud = static.get('tagcloud').body
+    import logging
+    logging.debug("tagcloud = " + str(tagcloud))
+    
     template_vals = {
         'generator_class': cls.__name__,
         'posts': posts[:config.posts_per_page],
         'prev_page': prev_page if pagenum > 1 else None,
         'next_page': next_page if more_posts else None,
+        'tagcloud': tagcloud,
     }
     rendered = utils.render_template("listing.html", template_vals)
 
@@ -405,16 +413,30 @@ class TagCloudContentGenerator(ContentGenerator):
       tag_counter.tagcount += 1
       tag_counter.put()
  
-   # Build triples of (tag, url, count) by extract the 'tag_cloud_max_size' most popular tags.   
+    # Build triples of (tag, url, count) by extract the 'tag_cloud_max_size' most popular tags.   
     q = models.TagCounter.all().order('-tagcount')
     tags_and_counts = list(itertools.islice((x.tag_and_count for x in q if x.tagcount != 0), config.tag_cloud_max_size))
     
+    # Calculate font sizes for tags
+    from math import log
+    tags_and_counts_dict=dict(tags_and_counts)
+    logging.debug('TagCloudContentGenerator.generate_resource in generators.py, tags_and_counts_dict = ' + str(tags_and_counts_dict))
+    min_count = min(tags_and_counts_dict.values())
+    max_count = max(tags_and_counts_dict.values())
+    c = log( max_count - (min_count-1) ) / (config.tag_cloud_max_fontsize - config.tag_cloud_min_fontsize or 1) # scaling constant
+    c = c or 1 # Avoid div by zero if min and max are equal.
+    logging.debug('TagCloudContentGenerator.generate_resource in generators.py, min_count = ' + str(min_count) + ', max_count = ' + str(max_count) + ', c = ' + str(c))
+    tagcloud = []
+    for tag_name, tag_count in tags_and_counts_dict.items():
+      size = log( tag_count - (min_count-1) ) / c + config.tag_cloud_min_fontsize
+      tagcloud.append({'tag':tag_name, 'url':tag_name, 'count':tag_count, 'fontsize':round(size)})
+    
     # Pass these tag pairs and counts as template variables to the tag cloud template.
     template_vals = {
-      'tags_and_counts': tags_and_counts,
+      'tagcloud': tagcloud,
     }    
     rendered = utils.render_template("tagcloud.html", template_vals)
     
-    # Store the tagcloud HTML in the static store.
-    static.set('/tagcloud.html', rendered, config.html_mime_type)
+    # Store the tagcloud HTML in the static store undrthe path 'tagcloud'.
+    static.set('tagcloud', rendered, config.html_mime_type, indexed=False)
 generator_list.append(TagCloudContentGenerator)

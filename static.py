@@ -15,7 +15,6 @@ import aetycoon
 import config
 import utils
 
-
 HTTP_DATE_FMT = "%a, %d %b %Y %H:%M:%S GMT"
 
 if config.google_site_verification is not None:
