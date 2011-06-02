@@ -5,7 +5,7 @@ blog_name = 'WikiBlog'
 author_name = 'Code Pro Bono'
 
 # (Optional) slogan
-slogan = 'Everyone should blog...'
+slogan = 'Anyone can blog...'
 
 # The hostname this site will primarially serve off (used for Atom feeds)
 host = 'wikiblog.jugglethis.net'
@@ -29,12 +29,7 @@ post_path_format = '/%(year)d/%(month)02d/%(slug)s'
 
 # A nested list of sidebar menus, for convenience. If this isn't versatile
 # enough, you can edit themes/default/base.html instead.
-sidebars = [
-  ('Blogroll', [
-	'<a href="/2011/05/WikiBlog-Roadmap">WikiBlog Roadmap</a>',
-    '<a href="http://blog.notdot.net/2009/10/Writing-a-blog-system-on-App-Engine">Nick Johnsonz\'s Bloggart</a>',
-  ])
-]
+sidebars = []
 
 # Number of entries per page in indexes.
 posts_per_page = 10
