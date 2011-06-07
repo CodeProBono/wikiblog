@@ -1,5 +1,5 @@
 application: jugglethis-wikiblog
-version: live
+version: experimental
 runtime: python
 api_version: 1
 

@@ -405,6 +405,8 @@ class TagCloudContentGenerator(ContentGenerator):
   """ContentGenerator for tag clouds.
   @author Tom Allen
   """
+  
+  can_defer = False
 
   @classmethod
   def get_resource_list(cls, post):
