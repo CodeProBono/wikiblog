@@ -1,6 +1,3 @@
-{% extends "base.html" %}
-{% block title %}Archives - {{config.blog_name}}{% endblock %}
-{% block body %}
 <ul>
 	{% for months in date_struct %}
 	<li>
@@ -11,4 +8,3 @@
 	</ul></li>
 	{% endfor %}
 </ul>
-{% endblock %}

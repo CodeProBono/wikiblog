@@ -1,6 +1,3 @@
-{% extends "base.html" %}
-{% block title %}{{post.title|escape}} - {{config.blog_name}}{% endblock %}
-{% block body %}
   <h2>{{post.title|escape}}</h2>
     <p class="post-info">
       Posted by {{config.author_name}}
@@ -63,4 +60,3 @@
       }, skin);
     </script>
   {% endif %}
-{% endblock %}

@@ -118,13 +118,8 @@ class PostContentGenerator(ContentGenerator):
       static.remove(post.path)
       return
       
-    # Grab the tagcloud content from the static store and add to 
-    # the template_vals so base.html can use it.
-    tagcloud = static.get('tagcloud').body      
-      
     template_vals = {
         'post': post,
-        'tagcloud': tagcloud
     }
     prev, next = cls.get_prev_next(post)
     if prev is not None:
@@ -151,13 +146,8 @@ class PostPrevNextContentGenerator(PostContentGenerator):
     if post is None:
       return
      
-    # Grab the tagcloud content from the static store and add to 
-    # the template_vals so base.html can use it.
-    tagcloud = static.get('tagcloud').body     
-     
     template_vals = {
         'post': post,
-        'tagcloud': tagcloud,
     }
     prev, next = cls.get_prev_next(post)
     if prev is not None:
@@ -218,19 +208,12 @@ class ListingContentGenerator(ContentGenerator):
     prev_page = _get_path() % path_args
     path_args['pagenum'] = pagenum + 1
     next_page = cls.path % path_args
-    
-    # Grab the tagcloud content from the static store and add to 
-    # the template_vals so base.html can use it.
-    tagcloud = static.get('tagcloud').body
-    import logging
-    logging.debug("tagcloud = " + str(tagcloud))
-    
+       
     template_vals = {
         'generator_class': cls.__name__,
         'posts': posts[:config.posts_per_page],
         'prev_page': prev_page if pagenum > 1 else None,
         'next_page': next_page if more_posts else None,
-        'tagcloud': tagcloud,
     }
     rendered = utils.render_template("listing.html", template_vals)
 
@@ -327,16 +310,11 @@ class ArchiveIndexContentGenerator(ContentGenerator):
     date_struct = {}
     for date in dates:
       date_struct.setdefault(date.year, []).append(date)
-
-    # Grab the tagcloud content from the static store and add to 
-    # the template_vals so base.html can use it.
-    tagcloud = static.get('tagcloud').body
-
+      
     str = utils.render_template("archive.html", {
       'generator_class': cls.__name__,
       'dates': dates,
       'date_struct': date_struct.values(),
-      'tagcloud': tagcloud,
     })
     static.set('/archive/', str, config.html_mime_type)
 generator_list.append(ArchiveIndexContentGenerator)
@@ -389,13 +367,8 @@ class PageContentGenerator(ContentGenerator):
     if action == 'delete':
       static.remove(page.path)
     else:
-      # Grab the tagcloud content from the static store and add to 
-      # the template_vals so base.html can use it.
-      tagcloud = static.get('tagcloud').body
-    
       template_vals = {
           'page': page,
-          'tagcloud': tagcloud,
       }
       rendered = utils.render_template('pages/%s' % (page.template,),
                                        template_vals)

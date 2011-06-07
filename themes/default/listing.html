@@ -1,6 +1,3 @@
-{% extends "base.html" %}
-{% block title %}{{config.blog_name}}{% endblock %}
-{% block body %}
   {% for post in posts %}
     <h2><a href="{{config.url_prefix}}{{post.path}}">{{post.title|escape}}</a></h2>
     <p class="post-info">
@@ -43,4 +40,3 @@
     //]]>
     </script>
   {% endif %}
-{% endblock %}

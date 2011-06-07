@@ -130,18 +130,27 @@ class StaticContentHandler(webapp.RequestHandler):
   """
   def output_content(self, content, serve=True):
     if content.content_type:
-      self.response.headers['Content-Type'] = content.content_type
+        self.response.headers['Content-Type'] = content.content_type
     last_modified = content.last_modified.strftime(HTTP_DATE_FMT)
     self.response.headers['Last-Modified'] = last_modified
     self.response.headers['ETag'] = '"%s"' % (content.etag,)
     for header in content.headers:
-      key, value = header.split(':', 1)
-      self.response.headers[key] = value.strip()
+        key, value = header.split(':', 1)
+        self.response.headers[key] = value.strip()
     if serve:
-      self.response.set_status(content.status)
-      self.response.out.write(content.body)
+        self.response.set_status(content.status)
+      
+        # Grab the tagcloud content from the static store and add to 
+        # the template_vals so base.html can use it.
+        tagcloud = get('tagcloud').body
+      
+        # Write the output to the base.html template, which combines
+        # the pre-generated static content into the final page.
+        self.response.out.write(utils.render_template('base.html', {
+            'content_body': content.body,
+            'tagcloud': tagcloud}))
     else:
-      self.response.set_status(304)
+        self.response.set_status(304)
 
   def get(self, path):
     if not path.startswith(config.url_prefix):
