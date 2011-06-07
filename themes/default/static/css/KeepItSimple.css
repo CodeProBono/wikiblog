@@ -241,7 +241,7 @@ input.button {
 /* header quick search */
 #header form#quick-search {
 	position: absolute;
-	top: 10px; right: 0;
+	top: 10px; right: 150px;
 	padding: 0; margin: 0;
 	border: none;
 	width: 270px; height: 33px;

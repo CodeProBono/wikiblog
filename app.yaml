@@ -35,5 +35,9 @@ handlers:
   static_files: themes/\1/static/\2
   upload: themes/[^/]+/static/.*
 
+- url: /favicon.ico
+  static_files: static/default/favicon.ico
+  upload: themes/default/static/favicon.ico
+
 - url: /.*
   script: static.py
