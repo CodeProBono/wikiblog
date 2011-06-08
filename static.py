@@ -128,7 +128,7 @@ class StaticContentHandler(webapp.RequestHandler):
     only calls output_content() with serve==true if it's appropriate to serve
     the content. output_content() then actually writes the content.body out.
   """
-  def output_content(self, content, serve=True):
+  def output_content(self, content, serve=True, uses_base_template=True):
     if content.content_type:
         self.response.headers['Content-Type'] = content.content_type
     last_modified = content.last_modified.strftime(HTTP_DATE_FMT)
@@ -139,16 +139,18 @@ class StaticContentHandler(webapp.RequestHandler):
         self.response.headers[key] = value.strip()
     if serve:
         self.response.set_status(content.status)
-      
-        # Grab the tagcloud content from the static store and add to 
-        # the template_vals so base.html can use it.
-        tagcloud = get('tagcloud').body
-      
-        # Write the output to the base.html template, which combines
-        # the pre-generated static content into the final page.
-        self.response.out.write(utils.render_template('base.html', {
-            'content_body': content.body,
-            'tagcloud': tagcloud}))
+        if uses_base_template:
+            # Grab the tagcloud content from the static store and add to 
+            # the template_vals so base.html can use it.
+            tagcloud = get('tagcloud').body
+          
+            # Write the output to the base.html template, which combines
+            # the pre-generated static content into the final page.
+            self.response.out.write(utils.render_template('base.html', {
+                'content_body': content.body,
+                'tagcloud': tagcloud}))
+        else: # Straight-through content
+            self.response.out.write(content.body)
     else:
         self.response.set_status(304)
 
@@ -187,7 +189,13 @@ class StaticContentHandler(webapp.RequestHandler):
                for x in self.request.headers['If-None-Match'].split(',')]
       if content.etag in etags:
         serve = False
-    self.output_content(content, serve)
+
+    # Check whether the output should simply pass straight through, rather than via the base.html template.        
+    uses_base_template = True
+    if path.startswith(('/sitemap.xml','/feeds/')):
+        uses_base_template = False
+       
+    self.output_content(content, serve, uses_base_template)
 
 
 application = webapp.WSGIApplication([
