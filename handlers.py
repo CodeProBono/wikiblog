@@ -13,7 +13,7 @@ import utils
 
 from django import newforms as forms
 from google.appengine.ext.db import djangoforms
-
+from google.appengine.api import users
 
 class PostForm(djangoforms.ModelForm):
   title = forms.CharField(widget=forms.TextInput(attrs={'id':'name'}))
@@ -48,10 +48,18 @@ class BaseHandler(webapp.RequestHandler):
   def render_to_response(self, template_name, template_vals=None, theme=None):
     if not template_vals:
       template_vals = {}
+    # User must be an admin to reach this handler.
+    loginout_url = users.create_logout_url(self.request.uri)
+    user_name = users.get_current_user().nickname()
+    url_linktext = 'Logout'
+
     template_vals.update({
         'path': self.request.path,
         'handler_class': self.__class__.__name__,
         'is_admin': True,
+        'loginout_url': loginout_url,
+        'user_name': user_name,
+        'url_linktext': url_linktext,
     })
     template_name = os.path.join("admin", template_name)
     self.response.out.write(utils.render_template(template_name, template_vals,
@@ -103,7 +111,6 @@ class PostHandler(BaseHandler):
     that the user already entered. If the form is valid, it saves the form,
     creating a new entity. It then calls .publish() on the new BlogPost
     entity. """
-    from google.appengine.api import users
     form = PostForm(data=self.request.POST, instance=post,
                     initial={'draft': post and post.published is None})
     if form.is_valid():

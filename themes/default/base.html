@@ -28,13 +28,14 @@
 				{% if user_name %}
 				  <li>You are: {{user_name}}{% if is_admin %} (Admin){% endif %}</li>{# This user name should link to their posts eventually #}
 				  <li><a href="{{loginout_url}}">{{url_linktext}}</a></li>
-				  {% if is_admin %}
-					<li{% ifequal handler_class "AdminHandler" %} id="current"{% endifequal %}><a href="{{config.url_prefix}}/admin/posts">Posts</a></li>
-					<li{% ifequal handler_class "PageAdminHandler" %} id="current"{% endifequal %}><a href="{{config.url_prefix}}/admin/pages">Pages</a></li>
-				  {% endif %}
 				{% endif %}
 				{#<li><a href="/about">About {{config.blog_name}}</a></li>#}
-        {% block menu %}{% endblock %}
+			  {% block menu %}
+				{% if is_admin %}
+				  <li{% ifequal handler_class "AdminHandler" %} id="current"{% endifequal %}><a href="{{config.url_prefix}}/admin/posts">Posts</a></li>
+				  <li{% ifequal handler_class "PageAdminHandler" %} id="current"{% endifequal %}><a href="{{config.url_prefix}}/admin/pages">Pages</a></li>
+				{% endif %}
+			  {% endblock %}
 			</ul>
 		</div>		
 		<div id="header-image"></div> 
