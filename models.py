@@ -52,6 +52,7 @@ class BlogPost(db.Model):
   published = db.DateTimeProperty()
   updated = db.DateTimeProperty(auto_now=False)
   deps = aetycoon.PickleProperty()
+  original_author = db.UserProperty()
 
   @property
   def published_tz(self):

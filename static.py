@@ -9,6 +9,7 @@ from google.appengine.datastore import entity_pb
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.api import users
 
 import fix_path
 import aetycoon
@@ -143,12 +144,30 @@ class StaticContentHandler(webapp.RequestHandler):
             # Grab the tagcloud content from the static store and add to 
             # the template_vals so base.html can use it.
             tagcloud = get('tagcloud').body
+            
+            # Get the current user's name (or Anonymous), a link to logout
+            # (or in, if Anon), and the text to display this.
+            is_admin = False
+            if users.get_current_user():
+                loginout_url = users.create_logout_url(self.request.uri)
+                user_name = users.get_current_user().nickname()
+                url_linktext = 'Logout'
+                if users.is_current_user_admin():
+                    is_admin = True
+            else:
+                loginout_url = users.create_login_url(self.request.uri)
+                user_name = 'Anonymous'
+                url_linktext = 'Login'
           
             # Write the output to the base.html template, which combines
             # the pre-generated static content into the final page.
             self.response.out.write(utils.render_template('base.html', {
                 'content_body': content.body,
-                'tagcloud': tagcloud}))
+                'tagcloud': tagcloud,
+                'loginout_url': loginout_url,
+                'user_name': user_name,
+                'url_linktext': url_linktext,
+                'is_admin': is_admin}))
         else: # Straight-through content
             self.response.out.write(content.body)
     else:
@@ -194,7 +213,10 @@ class StaticContentHandler(webapp.RequestHandler):
     uses_base_template = True
     if path.startswith(('/sitemap.xml','/feeds/')):
         uses_base_template = False
-       
+    
+    serve = True; # Added by Tom because WikiBlog is more dynamic than Bloggart.
+                  # For instance, when redirecting back due to login, we need
+                  # header bar to refresh properly.
     self.output_content(content, serve, uses_base_template)
 
 

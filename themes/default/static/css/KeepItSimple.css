@@ -286,7 +286,9 @@ input.button {
 }
 #header #nav ul li {
 	float: left;
-	margin: 0; padding: 0 0 0 10px;		
+	margin: 0; padding: 0 0 0 10px;
+	color: #666666;
+	font: bold 14px/40px 'Trebuchet MS', 'Helvetica Neue', Arial, Sans-Serif;
 }
 #header #nav ul li a {
 	float: left;

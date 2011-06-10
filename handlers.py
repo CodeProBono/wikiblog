@@ -103,6 +103,7 @@ class PostHandler(BaseHandler):
     that the user already entered. If the form is valid, it saves the form,
     creating a new entity. It then calls .publish() on the new BlogPost
     entity. """
+    from google.appengine.api import users
     form = PostForm(data=self.request.POST, instance=post,
                     initial={'draft': post and post.published is None})
     if form.is_valid():
@@ -113,8 +114,12 @@ class PostHandler(BaseHandler):
       else:
         if not post.path: # Publish post
           post.updated = post.published = datetime.datetime.now()
+          post.original_author = users.get_current_user() # Only assign the original user on first save of non-draft post.
         else:# Edit post
           post.updated = datetime.datetime.now()
+          if not post.original_author: # If no original author was ever assigned, then assign this guy.
+            post.original_author = users.get_current_user()
+          # TODO: Add additional authors to editors list...
         post.publish()
       self.render_to_response("published.html", {
           'post': post,

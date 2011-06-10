@@ -1,7 +1,7 @@
   {% for post in posts %}
     <h2><a href="{{config.url_prefix}}{{post.path}}">{{post.title|escape}}</a></h2>
     <p class="post-info">
-      Posted by {{config.author_name}}
+      Originally written by {% if post.original_author %}{{post.original_author}}{% else %}Anonymous{% endif %}
       {% if post.tags %}
         | Filed under
         {% for tag in post.tag_pairs %}
