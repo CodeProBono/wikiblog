@@ -52,7 +52,9 @@ class BlogPost(db.Model):
   published = db.DateTimeProperty()
   updated = db.DateTimeProperty(auto_now=False)
   deps = aetycoon.PickleProperty()
-  original_author = db.UserProperty()
+  original_author_as_user = db.UserProperty() # User object for original author
+  original_author_name = db.StringProperty() # User name string for original author
+  editors = db.StringListProperty() # User name strings for subsequent editors
 
   @property
   def published_tz(self):
@@ -239,3 +241,6 @@ class TagCounter(db.Model):
       inst.tagcount += 1
       inst.put()
       
+class UserPrefs(db.Model):
+  user = db.UserProperty()
+  name = db.StringProperty()

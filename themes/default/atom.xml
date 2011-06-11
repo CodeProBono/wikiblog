@@ -20,7 +20,7 @@
         <updated>{{post.updated_tz|date:"Y-m-d\TH:i:s\Z"}}</updated>
         <published>{{post.published_tz|date:"Y-m-d\TH:i:s\Z"}}</published>
         <author>
-            <name>{% if post.original_author %}{{post.original_author}}{% else %}Anonymous{% endif %}</name>
+            <name>{% if post.original_author_name %}{{post.original_author_name}}{% else %}Anonymous{% endif %}</name>
             <uri>http://{{config.host}}{{config.url_prefix}}/</uri>
         </author>
         <content type="html">

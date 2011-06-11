@@ -15,6 +15,10 @@ import fix_path
 import aetycoon
 import config
 import utils
+import models
+
+from django import newforms as forms
+from google.appengine.ext.db import djangoforms
 
 HTTP_DATE_FMT = "%a, %d %b %Y %H:%M:%S GMT"
 
@@ -24,36 +28,35 @@ else:
     ROOT_ONLY_FILES = ['/robots.txt']
 
 class StaticContent(db.Model):
-  """Container for statically served content.
-
-  The serving path for content is provided in the key name.
-  """
-  body = db.BlobProperty()
-  content_type = db.StringProperty()
-  status = db.IntegerProperty(required=True, default=200)
-  last_modified = db.DateTimeProperty(required=True)
-  etag = aetycoon.DerivedProperty(lambda x: hashlib.sha1(x.body).hexdigest())
-  indexed = db.BooleanProperty(required=True, default=True)
-  headers = db.StringListProperty()
+    """Container for statically served content.
+    
+    The serving path for content is provided in the key name.
+    """
+    body = db.BlobProperty()
+    content_type = db.StringProperty()
+    status = db.IntegerProperty(required=True, default=200)
+    last_modified = db.DateTimeProperty(required=True)
+    etag = aetycoon.DerivedProperty(lambda x: hashlib.sha1(x.body).hexdigest())
+    indexed = db.BooleanProperty(required=True, default=True)
+    headers = db.StringListProperty()
 
 
 def get(path):
-  """Returns the StaticContent object for the provided path.
-
-  Args:
-    path: The path to retrieve StaticContent for.
-  Returns:
-    A StaticContent object, or None if no content exists for this path.
-  """
-  entity = memcache.get(path)
-  if entity:
-    entity = db.model_from_protobuf(entity_pb.EntityProto(entity))
-  else:
-    entity = StaticContent.get_by_key_name(path)
+    """Returns the StaticContent object for the provided path.
+    
+    Args:
+      path: The path to retrieve StaticContent for.
+    Returns:
+      A StaticContent object, or None if no content exists for this path.
+    """
+    entity = memcache.get(path)
     if entity:
-      memcache.set(path, db.model_to_protobuf(entity).Encode())
-
-  return entity
+        entity = db.model_from_protobuf(entity_pb.EntityProto(entity))
+    else:
+        entity = StaticContent.get_by_key_name(path)
+    if entity:
+        memcache.set(path, db.model_to_protobuf(entity).Encode())
+    return entity
 
 
 def set(path, body, content_type, indexed=True, **kwargs):
@@ -149,14 +152,23 @@ class StaticContentHandler(webapp.RequestHandler):
             # (or in, if Anon), and the text to display this.
             is_admin = False
             if users.get_current_user():
+                import models
+                q = db.GqlQuery("SELECT * FROM UserPrefs WHERE user = :1", users.get_current_user())
+                userprefs = q.get()
+                if userprefs:
+                    user_name = userprefs.name
+                else: # If the user does not have a preferences object,
+                      # redirect them to the user profile page.
+                    user_name = users.get_current_user().nickname()
+                    self.redirect("/userprofile")
+                    
                 loginout_url = users.create_logout_url(self.request.uri)
-                user_name = users.get_current_user().nickname()
                 url_linktext = 'Logout'
                 if users.is_current_user_admin():
                     is_admin = True
             else:
-                loginout_url = users.create_login_url(self.request.uri)
                 user_name = 'Anonymous'
+                loginout_url = users.create_login_url(self.request.uri)
                 url_linktext = 'Login'
           
             # Write the output to the base.html template, which combines
@@ -216,12 +228,11 @@ class StaticContentHandler(webapp.RequestHandler):
     
     serve = True; # Added by Tom because WikiBlog is more dynamic than Bloggart.
                   # For instance, when redirecting back due to login, we need
-                  # header bar to refresh properly.
+                  # the header bar to refresh properly.
     self.output_content(content, serve, uses_base_template)
 
-
 application = webapp.WSGIApplication([
-                ('(/.*)', StaticContentHandler),
+                ('(/.*)', StaticContentHandler),                
               ])
 
 

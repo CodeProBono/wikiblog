@@ -117,10 +117,9 @@ class PostContentGenerator(ContentGenerator):
     if action == 'delete':
       static.remove(post.path)
       return
-      
-    template_vals = {
-        'post': post,
-    }
+    
+    template_vals = {'post': post}
+   
     prev, next = cls.get_prev_next(post)
     if prev is not None:
       template_vals['prev']=prev
@@ -149,6 +148,7 @@ class PostPrevNextContentGenerator(PostContentGenerator):
     template_vals = {
         'post': post,
     }
+    
     prev, next = cls.get_prev_next(post)
     if prev is not None:
      template_vals['prev']=prev
@@ -215,6 +215,7 @@ class ListingContentGenerator(ContentGenerator):
         'prev_page': prev_page if pagenum > 1 else None,
         'next_page': next_page if more_posts else None,
     }
+    
     rendered = utils.render_template("listing.html", template_vals)
 
     path_args['pagenum'] = pagenum
@@ -342,6 +343,7 @@ class AtomContentGenerator(ContentGenerator):
         'posts': posts,
         'updated': now,
     }
+    
     rendered = utils.render_template("atom.xml", template_vals)
     static.set('/feeds/atom.xml', rendered,
                'application/atom+xml; charset=utf-8', indexed=False,

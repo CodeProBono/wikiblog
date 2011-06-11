@@ -29,6 +29,8 @@ class PostForm(djangoforms.ModelForm):
     model = models.BlogPost
     fields = [ 'title', 'body', 'tags' ]
 
+class UserProfileForm(djangoforms.ModelForm):
+  name = forms.CharField(widget=forms.TextInput(attrs={'id':'name'}))
 
 def with_post(fun):
   """ Decorator function that attaches to methods that require an optional
@@ -46,12 +48,17 @@ def with_post(fun):
 
 class BaseHandler(webapp.RequestHandler):
   def render_to_response(self, template_name, template_vals=None, theme=None):
+    from google.appengine.ext import db
     if not template_vals:
       template_vals = {}
     # User must be an admin to reach this handler.
     loginout_url = users.create_logout_url(self.request.uri)
-    user_name = users.get_current_user().nickname()
     url_linktext = 'Logout'
+    q = db.GqlQuery("SELECT * FROM UserPrefs WHERE user = :1", users.get_current_user())
+    userprefs = q.get()
+    user_name = users.get_current_user().nickname() # Default to email if we can't find the user prefs, but this shouldn't actually happen...
+    if userprefs:
+        user_name = userprefs.name
 
     template_vals.update({
         'path': self.request.path,
@@ -111,6 +118,8 @@ class PostHandler(BaseHandler):
     that the user already entered. If the form is valid, it saves the form,
     creating a new entity. It then calls .publish() on the new BlogPost
     entity. """
+    
+    from google.appengine.ext import db
     form = PostForm(data=self.request.POST, instance=post,
                     initial={'draft': post and post.published is None})
     if form.is_valid():
@@ -121,12 +130,26 @@ class PostHandler(BaseHandler):
       else:
         if not post.path: # Publish post
           post.updated = post.published = datetime.datetime.now()
-          post.original_author = users.get_current_user() # Only assign the original user on first save of non-draft post.
+          post.original_author_as_user = users.get_current_user() # Only assign the original user on first save of non-draft post.
+          # Find this user's name string
+          q = db.GqlQuery("SELECT * FROM UserPrefs WHERE user = :1", post.original_author_as_user)
+          userprefs = q.get()
+          if userprefs:
+            post.original_author_name = userprefs.name # Set user name string for this post.
+          logging.info('PostHandler.post in handlers.py, original_author_name = ' + str(post.original_author_name))
         else:# Edit post
           post.updated = datetime.datetime.now()
-          if not post.original_author: # If no original author was ever assigned, then assign this guy.
-            post.original_author = users.get_current_user()
-          # TODO: Add additional authors to editors list...
+          # Find this user's name string
+          q = db.GqlQuery("SELECT * FROM UserPrefs WHERE user = :1", users.get_current_user())
+          userprefs = q.get()
+          # Add additional authors to editors list, provided they aren't the
+          # original author, and aren't already in the list.
+          logging.info('PostHandler.post in handlers.py, editors started = ' + str(post.editors))
+          if userprefs and userprefs.name != post.original_author_name:
+            if userprefs.name not in post.editors:
+              post.editors.append( userprefs.name )
+          logging.info('PostHandler.post in handlers.py, editors finished = ' + str(post.editors))
+        post.put()
         post.publish()
       self.render_to_response("published.html", {
           'post': post,

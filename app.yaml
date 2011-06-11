@@ -38,6 +38,9 @@ handlers:
 - url: /favicon.ico
   static_files: static/default/favicon.ico
   upload: themes/default/static/favicon.ico
+  
+- url: /userprofile
+  script: userprofile.py
 
 - url: /.*
   script: static.py
