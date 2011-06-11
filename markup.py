@@ -76,7 +76,7 @@ MARKUP_MAP = {
 
 
 def get_renderer(post):
-  """Returns a render function for this posts body markup."""
+  """Returns a render function for this post's body markup."""
   return MARKUP_MAP.get(post.body_markup)[1]
 
 

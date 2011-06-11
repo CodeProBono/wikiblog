@@ -35,7 +35,7 @@ class ContentGenerator(object):
     resources this post will appear in. For example, if we were implementing
     tags, this would return a list of tags in the post: ["foo", "bar", "baz"]
     
-    TomNote: This is described really badly by the original author, but it
+    TomNote: This is described really badly by the original author, but it is
     intended to be read as "this post affects these resources", and is used
     later to say "for all resources that were affected by this post, please
     regenerate your content now" and similar things.
@@ -276,7 +276,7 @@ class ArchivePageContentGenerator(ListingContentGenerator):
     # datetime_from_key_name() only sets the year and month.
     min_ts = ts.replace(day=1)
 
-    # Make the next month the upperbound.
+    # Make the next month the upper bound.
     # Python doesn't wrap the month for us, so handle it manually.
     if min_ts.month >= 12:
       max_ts = min_ts.replace(year=min_ts.year+1, month=1)
@@ -437,3 +437,4 @@ class TagCloudContentGenerator(ContentGenerator):
     # Store the tagcloud HTML in the static store undrthe path 'tagcloud'.
     static.set('tagcloud', rendered, config.html_mime_type, indexed=False)
 generator_list.append(TagCloudContentGenerator)
+
