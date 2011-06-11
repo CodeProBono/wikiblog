@@ -7,7 +7,7 @@ author_name = 'Code Pro Bono'
 # (Optional) slogan
 slogan = 'Anyone can blog...'
 
-# The hostname this site will primarially serve off (used for Atom feeds)
+# The hostname this site will primarily serve off (used for Atom feeds)
 host = 'wikiblog.jugglethis.net'
 
 # Selects the theme to use. Theme names correspond to directories under
@@ -83,7 +83,7 @@ url_prefix = ''
 # This allows you to expand on your social graph.
 rel_me = None
 
-# For use a feed proxy like feedburne.google.com
+# For use a feed proxy like feedburner.google.com
 feed_proxy = None
 
 # To use Google Friends Connect.                                          

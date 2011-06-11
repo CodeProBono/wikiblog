@@ -170,7 +170,7 @@ class DeleteHandler(BaseHandler):
 class PreviewHandler(BaseHandler):
   @with_post
   def get(self, post):
-    # Temporary set a published date iff it's still
+    # Temporarily set a published date iff it's still
     # datetime.max. Django's date filter has a problem with
     # datetime.max and a "real" date looks better.
     if post.published == datetime.datetime.max:
