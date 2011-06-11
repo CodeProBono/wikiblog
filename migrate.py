@@ -53,7 +53,7 @@ class BaseMigration(object):
         user_api_key=disqus_user_key,
         forum_id=forum_id)['message']
 
-
+#FIXME: Surely this class is meant to be called BlogBreakingMigration...
 class BloogBreakingMigration(BaseMigration):
   class Article(db.Model):
     title = db.StringProperty()
@@ -173,6 +173,7 @@ class WordpressMigration(BaseMigration):
 
   @classmethod
   def _expand_caption_tag(cls, content):
+    # FIXME: Is the below regex really meant to take a raw string? Me thinks not.
     content = re.sub(r'\[caption[^\]]*\]', '<div class="image">', content)
     content = content.replace('[/caption]', '</div>')
     return content

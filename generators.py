@@ -437,4 +437,3 @@ class TagCloudContentGenerator(ContentGenerator):
     # Store the tagcloud HTML in the static store undrthe path 'tagcloud'.
     static.set('tagcloud', rendered, config.html_mime_type, indexed=False)
 generator_list.append(TagCloudContentGenerator)
-
