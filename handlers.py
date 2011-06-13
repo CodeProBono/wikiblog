@@ -25,9 +25,10 @@ class PostForm(djangoforms.ModelForm):
     choices=[(k, v[0]) for k, v in markup.MARKUP_MAP.iteritems()])
   tags = forms.CharField(widget=forms.Textarea(attrs={'rows': 5, 'cols': 20}))
   draft = forms.BooleanField(required=False)
+  locked = forms.BooleanField(required=False)
   class Meta:
     model = models.BlogPost
-    fields = [ 'title', 'body', 'tags' ]
+    fields = [ 'title', 'body', 'tags', 'locked' ]
 
 class UserProfileForm(djangoforms.ModelForm):
   name = forms.CharField(widget=forms.TextInput(attrs={'id':'name'}))

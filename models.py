@@ -55,6 +55,7 @@ class BlogPost(db.Model):
   original_author_as_user = db.UserProperty() # User object for original author
   original_author_name = db.StringProperty() # User name string for original author
   editors = db.StringListProperty() # User name strings for subsequent editors
+  locked = db.BooleanProperty(default=True) # Determines whether the post is locked from being edited. Defaults to true.
 
   @property
   def published_tz(self):

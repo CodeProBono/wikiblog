@@ -17,9 +17,17 @@
   {{post.rendered}}
   <p class="postmeta">
     <span class="date">{{post.published_tz|date:config.date_format}}</span>
+    {% if post.locked %}
+      | Locked
+    {% else %}
+      | <a href="{{config.url_prefix}}/admin/post/{{post.key.id}}">Edit Post</a>
+    {% endif %}
   </p>
   {% if prev %}
     <a id="prev" href="{{config.url_prefix}}{{prev.path}}">Previous Post</a>
+  {% endif %}
+  {% if prev and next %}
+    | 
   {% endif %}
   {% if next %}
     <a id="next" href="{{config.url_prefix}}{{next.path}}">Next Post</a>
