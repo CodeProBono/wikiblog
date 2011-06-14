@@ -3,7 +3,7 @@
 """
 Publish and tag a given file, with title and body extracted from the HTML
 markup of the file.  The corresponding draft page, if any, will be deleted if
-the publish request succeed.
+the publish request succeeds.
 
 Usage: publish [-l] [-t tagstring] [-f] filepath
 
@@ -11,9 +11,9 @@ By default, requests are made to {APPID}.appspot.com. The script will fail if
 content already exists on the given path.
 
 Options:
-	  -l    make requests to localhost:8080
-    -t    use the supplied tags, which should be given as a comma-separated string
-	  -f    force update
+      -l    make requests to localhost:8080
+      -t    use the supplied tags, which should be given as a comma-separated string
+      -f    force update
 """
 
 import BeautifulSoup
@@ -34,6 +34,9 @@ for o, v in opts:
 		tags = set(map(unicode, v.split(',')))
 	elif o == '-f':
 		forced = True
+if len(args) != 1:
+    sys.stderr.write('Usage: %s [-l] [-t tagstring] [-f] filepath\n' % sys.argv[0])
+    sys.exit(1)
 filename = args[0]
 
 import remote

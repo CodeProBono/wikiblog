@@ -9,7 +9,7 @@ By default, requests are made to {APPID}.appspot.com.
 
 Options:
     -l    make requests to localhost:8080
-		-v    make requests to $version.latest.{APPID}.appspot.com
+    -v    make requests to $version.latest.{APPID}.appspot.com
 """
 import sys
 
@@ -26,7 +26,6 @@ remote.attach(host)
 
 from google.appengine.ext import deferred
 
-import static
 import post_deploy
 
 

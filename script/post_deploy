@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 
 """
 Run a post_deploy task using deferred.
@@ -13,7 +13,6 @@ Options:
 """
 
 import sys
-import subprocess
 
 import remote
 
