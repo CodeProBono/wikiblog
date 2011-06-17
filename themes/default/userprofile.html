@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 {% block title %}{% if form.instance %}Edit{% else %}New{% endif %} User Profile{% endblock %}
 {% block body %}
-  <h2>{% if form.instance %}Edit{% else %}New{% endif %} User Profile</h2>
+  <h2>{% if form.instance %}Edit{% else %}New{% endif %} {{config.blog_name}} Profile</h2>
+  {{config.blog_name}} needs your name before you can write or edit posts. By signing in, you agree to abide by {{config.blog_name}}'s <a href="/tos">terms of service</a>.
   <form method="post" action="">
     <table>
       {{form}}
     </table>
-    <input type="submit" value="Submit post" />
+    <input type="submit" value="Sign In" />
   </form>
 {% endblock %}

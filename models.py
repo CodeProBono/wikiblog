@@ -68,6 +68,9 @@ class BlogPost(db.Model):
   @aetycoon.TransformProperty(tags)
   def normalized_tags(tags):
     return list(set(utils.slugify(x.lower()) for x in tags))
+  
+  def normalized_original_author_name(self):
+    return utils.slugify(original_author_name.lower())
 
   @property
   def tag_pairs(self):
@@ -245,3 +248,8 @@ class TagCounter(db.Model):
 class UserPrefs(db.Model):
   user = db.UserProperty()
   name = db.StringProperty()
+  postscount = db.IntegerProperty(required=True, default=0)
+
+  @property
+  def name_and_count(self):
+      return (utils.slugify(self.name.lower()), self.postscount)

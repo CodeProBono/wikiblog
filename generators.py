@@ -439,3 +439,18 @@ class TagCloudContentGenerator(ContentGenerator):
     # Store the tagcloud HTML in the static store undrthe path 'tagcloud'.
     static.set('tagcloud', rendered, config.html_mime_type, indexed=False)
 generator_list.append(TagCloudContentGenerator)
+
+class AuthorsContentGenerator(ListingContentGenerator):
+  """ContentGenerator for the authors pages."""
+
+  path = '/author/%(resource)s/%(pagenum)d'
+  first_page_path = '/tag/%(resource)s'
+
+  @classmethod
+  def get_resource_list(cls, post):
+    return post.normalized_original_author_name
+
+  @classmethod
+  def _filter_query(cls, resource, q):
+    q.filter('normalized_original_author_name =', resource)
+#generator_list.append(AuthorsContentGenerator)

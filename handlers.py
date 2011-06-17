@@ -30,9 +30,6 @@ class PostForm(djangoforms.ModelForm):
     model = models.BlogPost
     fields = [ 'title', 'body', 'tags', 'locked' ]
 
-class UserProfileForm(djangoforms.ModelForm):
-  name = forms.CharField(widget=forms.TextInput(attrs={'id':'name'}))
-
 def with_post(fun):
   """ Decorator function that attaches to methods that require an optional
   post ID. Loads the relevant BlogPost object. """

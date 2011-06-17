@@ -30,6 +30,13 @@ handlers:
 - url: /admin/.*
   script: admin.py
   login: admin
+  
+- url: /user
+  script: user.py
+  
+- url: /user/.*
+  script: user.py
+  login: required
 
 - url: /static/([^/]+)/(.*)
   static_files: themes/\1/static/\2
@@ -38,9 +45,6 @@ handlers:
 - url: /favicon.ico
   static_files: static/default/favicon.ico
   upload: themes/default/static/favicon.ico
-  
-- url: /userprofile
-  script: userprofile.py
 
 - url: /.*
   script: static.py

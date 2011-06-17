@@ -25,11 +25,12 @@
 			<ul>
 				{#<li{% ifequal generator_class "IndexContentGenerator" %} id="current"{% endifequal %}><a href="{{config.url_prefix}}/">Home</a></li>#}
 				{#<li{% ifequal generator_class "ArchiveIndexContentGenerator" %} id="current"{% endifequal %}><a href="{{config.url_prefix}}/archive/">Archive</a></li>#}
+				{#<li><a href="/about">About {{config.blog_name}}</a></li>#}
 				{% if user_name %}
 				  <li>You are: {{user_name}}{% if is_admin %} (Admin){% endif %}</li>{# This user name should link to their posts eventually #}
+				  <li><a href="/user/newpost">New Post</a></li>
 				  <li><a href="{{loginout_url}}">{{url_linktext}}</a></li>
-				{% endif %}
-				{#<li><a href="/about">About {{config.blog_name}}</a></li>#}
+				{% endif %}				
 			  {% block menu %}
 				{% if is_admin %}
 				  <li{% ifequal handler_class "AdminHandler" %} id="current"{% endifequal %}><a href="{{config.url_prefix}}/admin/posts">Posts</a></li>
@@ -91,7 +92,8 @@
 			</p>	
 			<p class="bottom-right" >
 				<a href="{{config.url_prefix}}/">Home</a> |
-				<a href="/about">About {{config.blog_name}}</a> | 
+				<a href="/about">About {{config.blog_name}}</a> |
+				<a href="/tos">Terms of Service</a> |
         <a href="{% if config.feed_proxy %}
 	        {{ config.feed_proxy }}
 	      {% else %}

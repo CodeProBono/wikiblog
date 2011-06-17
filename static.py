@@ -160,7 +160,7 @@ class StaticContentHandler(webapp.RequestHandler):
                 else: # If the user does not have a preferences object,
                       # redirect them to the user profile page.
                     user_name = users.get_current_user().nickname()
-                    self.redirect("/userprofile")
+                    self.redirect("/user")
                     
                 loginout_url = users.create_logout_url(self.request.uri)
                 url_linktext = 'Logout'
@@ -204,31 +204,32 @@ class StaticContentHandler(webapp.RequestHandler):
       self.response.out.write(utils.render_template('404.html'))
       return
 
+    # Determine e-tag and LastModified status
+    # Removed by Tom because WikiBlog is more dynamic than Bloggart.
+    # For instance, when redirecting back due to login, we need
+    # the header bar to refresh properly.
     serve = True
-    if 'If-Modified-Since' in self.request.headers:
-      try:
-        last_seen = datetime.datetime.strptime(
-            self.request.headers['If-Modified-Since'].split(';')[0],# IE8 '; length=XXXX' as extra arg bug
-            HTTP_DATE_FMT)
-        if last_seen >= content.last_modified.replace(microsecond=0):
-          serve = False
-      except ValueError, e:
-        import logging
-        logging.error('StaticContentHandler in static.py, ValueError:' + self.request.headers['If-Modified-Since'])
-    if 'If-None-Match' in self.request.headers:
-      etags = [x.strip('" ')
-               for x in self.request.headers['If-None-Match'].split(',')]
-      if content.etag in etags:
-        serve = False
+    #if 'If-Modified-Since' in self.request.headers:
+    #  try:
+    #    last_seen = datetime.datetime.strptime(
+    #        self.request.headers['If-Modified-Since'].split(';')[0],# IE8 '; length=XXXX' as extra arg bug
+    #        HTTP_DATE_FMT)
+    #    if last_seen >= content.last_modified.replace(microsecond=0):
+    #      serve = False
+    #  except ValueError, e:
+    #    import logging
+    #    logging.error('StaticContentHandler in static.py, ValueError:' + self.request.headers['If-Modified-Since'])
+    #if 'If-None-Match' in self.request.headers:
+    #  etags = [x.strip('" ')
+    #           for x in self.request.headers['If-None-Match'].split(',')]
+    #  if content.etag in etags:
+    #    serve = False
 
     # Check whether the output should simply pass straight through, rather than via the base.html template.        
     uses_base_template = True
     if path.startswith(('/sitemap.xml','/feeds/')):
         uses_base_template = False
     
-    serve = True; # Added by Tom because WikiBlog is more dynamic than Bloggart.
-                  # For instance, when redirecting back due to login, we need
-                  # the header bar to refresh properly.
     self.output_content(content, serve, uses_base_template)
 
 application = webapp.WSGIApplication([
