@@ -103,7 +103,7 @@ def ping_googlesitemap():
   from google.appengine.api import urlfetch
   google_url = 'http://www.google.com/webmasters/tools/ping?sitemap=http://' + config.host + '/sitemap.xml.gz'
   response = urlfetch.fetch(google_url, '', urlfetch.GET)
-  if response.status_code != 200:
+  if response.status_code not in range(200, 300):
     raise Warning("Google Sitemap ping failed", response.status_code, response.content)
 
 def tzinfo():

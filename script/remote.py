@@ -13,7 +13,7 @@ EMAIL = 'my.email@host.dom'
 REMOTE_API_PATH = '/remote_api'
 
 ## Extra paths to be inserted into sys.path,
-## including the SDK, it's libraries, your APPDIR, and APPDIR/lib
+## including the SDK, its libraries, your APPDIR, and APPDIR/lib
 EXTRA_PATHS = [
 	SDK_DIR,
 	os.path.join(SDK_DIR, 'lib', 'antlr3'),
@@ -29,7 +29,7 @@ from google.appengine.ext.remote_api import remote_api_stub
 
 def attach(host=None):
 	def auth_func():
-		if host and host.startswith('localhost'):
+		if host and host.split(':')[0] == 'localhost':
 			return ('foo', 'bar')
 		else:
 			return (EMAIL, getpass.getpass())
