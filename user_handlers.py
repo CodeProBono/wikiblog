@@ -57,11 +57,11 @@ class PostForm(djangoforms.ModelForm):
   body_markup = forms.ChoiceField(
     choices=[(k, v[0]) for k, v in markup.MARKUP_MAP.iteritems()])
   tags = forms.CharField(widget=forms.Textarea(attrs={'rows': 5, 'cols': 20}))
-  draft = forms.BooleanField(required=False)
   locked = forms.BooleanField(required=False)
+  anonymous = forms.BooleanField(required=False)
   class Meta:
     model = models.BlogPost
-    fields = [ 'title', 'body', 'tags', 'locked' ]
+    fields = [ 'title', 'body', 'tags', 'locked', 'anonymous' ]
 
 def with_post(fun):
   """ Decorator function that attaches to methods that require an optional
@@ -117,7 +117,6 @@ class PostHandler(BaseHandler):
     self.render_form(PostForm(
         instance=post,
         initial={
-          'draft': post and not post.path,
           'body_markup': post and post.body_markup or config.default_markup,
         }))
 
@@ -132,44 +131,51 @@ class PostHandler(BaseHandler):
     
     from google.appengine.ext import db
     form = PostForm(data=self.request.POST, instance=post,
-                    initial={'draft': post and post.published is None})
+                    initial={})
     if form.is_valid():
       post = form.save(commit=False)
-      if form.clean_data['draft']:# Draft post
-        post.published = datetime.datetime.max
-        post.put()
-      else:
-        if not post.path: # Publish post
-          post.updated = post.published = datetime.datetime.now()
-          post.original_author_as_user = users.get_current_user() # Only assign the original user on first save of non-draft post.
-          # Find this user's name string
-          q = db.GqlQuery("SELECT * FROM UserPrefs WHERE user = :1", post.original_author_as_user)
-          userprefs = q.get()
-          if userprefs:
-            post.original_author_name = userprefs.name # Set user name string for this post.
-          logging.info('PostHandler.post in handlers.py, original_author_name = ' + str(post.original_author_name))
-        else:# Edit post
-          post.updated = datetime.datetime.now()
-          # Find this user's name string
-          q = db.GqlQuery("SELECT * FROM UserPrefs WHERE user = :1", users.get_current_user())
-          userprefs = q.get()
-          # Add additional authors to editors list, provided they aren't the
-          # original author, and aren't already in the list.
-          logging.info('PostHandler.post in handlers.py, editors started = ' + str(post.editors))
-          if userprefs and userprefs.name != post.original_author_name:
-            if userprefs.name not in post.editors:
-              post.editors.append( userprefs.name )
+
+      if not post.path: # Publish post
+        post.updated = post.published = datetime.datetime.now()
+        post.original_author_as_user = users.get_current_user() # Only assign the original user on first save of non-draft post.
+        # Find this user's name string
+        q = db.GqlQuery("SELECT * FROM UserPrefs WHERE user = :1", post.original_author_as_user)
+        userprefs = q.get()
+        if userprefs and not form._cleaned_data()['anonymous']: # If user asked to be anonymous, don't record their name.
+          post.original_author_name = userprefs.name # Set user name string for this post.
+        else:
+          post.original_author_name = "Anonymous" # Change original author name to "Anonymous"
+        logging.info('PostHandler.post in handlers.py, original_author_name = ' + str(post.original_author_name))
+      else:# Edit post
+        post.updated = datetime.datetime.now()
+        # Find this user's name string
+        q = db.GqlQuery("SELECT * FROM UserPrefs WHERE user = :1", users.get_current_user())
+        userprefs = q.get()
+        # Add additional authors to editors list, provided they aren't the
+        # original author, and aren't already in the list.
+        logging.info('PostHandler.post in handlers.py, editors started = ' + str(post.editors))
+        if userprefs:
+          if userprefs.name != post.original_author_name: # If edited by someone not the original author
+            editor_name = userprefs.name
+            if form._cleaned_data()['anonymous']: # If user asked to be anonymous
+              editor_name = "Anonymous"
+              if userprefs.name in post.editors: # If they were previously an editor
+                post.editors.remove(userprefs.name) # remove their name.
+            if editor_name not in post.editors:
+              post.editors.append( editor_name )
             post.locked = False # Only the original author or an admin should
             # be able to lock posts.
             # TODO: the form should make this clear by greying-out the
             # button or something similar.
-          logging.info('PostHandler.post in handlers.py, editors finished = ' + str(post.editors))
-          
+          else: # If being edited by the original author
+            if form._cleaned_data()['anonymous']: # If user asked to be anonymous
+              post.original_author_name = "Anonymous" # Change original author name to "Anonymous"
+        logging.info('PostHandler.post in handlers.py, editors finished = ' + str(post.editors))
+        
         post.put()
         post.publish()
       self.render_to_response("published.html", {
-          'post': post,
-          'draft': form.clean_data['draft']})
+          'post': post})
     else:
       self.render_form(form)
 
