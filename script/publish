@@ -53,11 +53,12 @@ import utils
 soup = BeautifulSoup.BeautifulSoup(open(filename).read())
 title = unicode(soup.title.string)
 body = u''.join(unicode(s) for s in soup.body.contents if s)
+published = datetime.datetime.now()
 post = models.BlogPost(
 		title=title,
 		body=body,
 		tags=tags,
-		published=datetime.datetime.now()
+		published=published
 	)
 path = utils.format_post_path(post, 0)
 
@@ -67,6 +68,7 @@ if not static.add(path, '', config.html_mime_type):
 		post.title = title
 		post.body = body
 		post.tags = tags
+        post.published = published
 	else:
 		sys.exit("error: content exists on path %s, use -f to force update" % path)
 
