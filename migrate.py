@@ -42,18 +42,18 @@ class BaseMigration(object):
 
   def __init__(self, disqus_user_key, disqus_forum_name):
     forums = disqus_request('get_forum_list', user_api_key=disqus_user_key)
+    forum_id = None
     for forum in forums['message']:
       if forum['shortname'] == disqus_forum_name:
         forum_id = forum['id']
         break
-    else:
-      raise Exception("Forum not found", disqus_forum_name)
+    if not forum_id:
+      raise Exception('Forum not found', disqus_forum_name)
     self.forum_key = disqus_request(
         'get_forum_api_key',
         user_api_key=disqus_user_key,
         forum_id=forum_id)['message']
 
-#FIXME: Surely this class is meant to be called BlogBreakingMigration...
 class BloogBreakingMigration(BaseMigration):
   class Article(db.Model):
     title = db.StringProperty()
