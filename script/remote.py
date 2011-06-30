@@ -49,9 +49,10 @@ if __name__ == '__main__':
 	from google.appengine.ext import db
 	from google.appengine.api import memcache
 
-	BANNER = "App Engine remote_api shell\n" + \
-	"Python %s\n" % sys.version + \
-	"The db, and memcache modules are imported."
+	BANNER = \
+"""App Engine remote_api shell
+Python %s
+The db, and memcache modules are imported.""" % sys.version
 
 	## Use readline for completion/history if available
 	try:

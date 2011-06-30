@@ -20,9 +20,9 @@ import models
 from django import newforms as forms
 from google.appengine.ext.db import djangoforms
 
-HTTP_DATE_FMT = "%a, %d %b %Y %H:%M:%S GMT"
+HTTP_DATE_FMT = '%a, %d %b %Y %H:%M:%S GMT'
 
-if config.google_site_verification is not None:
+if config.google_site_verification:
     ROOT_ONLY_FILES = ['/robots.txt','/' + config.google_site_verification]
 else:
     ROOT_ONLY_FILES = ['/robots.txt']
@@ -73,7 +73,7 @@ def set(path, body, content_type, indexed=True, **kwargs):
   """
   now = datetime.datetime.now().replace(second=0, microsecond=0)
   defaults = {
-    "last_modified": now,
+    'last_modified': now,
   }
   defaults.update(kwargs)
   content = StaticContent(
@@ -91,8 +91,8 @@ def set(path, body, content_type, indexed=True, **kwargs):
           utils._regenerate_sitemap,
           _name='sitemap-%s' % (now.strftime('%Y%m%d%H%M'),),
           _eta=eta)
-  except (taskqueue.taskqueue.TaskAlreadyExistsError, taskqueue.taskqueue.TombstonedTaskError), e:
-    pass
+  except (taskqueue.taskqueue.TaskAlreadyExistsError, taskqueue.taskqueue.TombstonedTaskError):
+    pass # TODO: Comment about why these two errors are OK?
   return content
 
 def add(path, body, content_type, indexed=True, **kwargs):
@@ -137,7 +137,7 @@ class StaticContentHandler(webapp.RequestHandler):
         self.response.headers['Content-Type'] = content.content_type
     last_modified = content.last_modified.strftime(HTTP_DATE_FMT)
     self.response.headers['Last-Modified'] = last_modified
-    self.response.headers['ETag'] = '"%s"' % (content.etag,)
+    self.response.headers['ETag'] = '\"%s\"' % (content.etag,)
     for header in content.headers:
         key, value = header.split(':', 1)
         self.response.headers[key] = value.strip()
@@ -153,14 +153,14 @@ class StaticContentHandler(webapp.RequestHandler):
             is_admin = False
             if users.get_current_user():
                 import models
-                q = db.GqlQuery("SELECT * FROM UserPrefs WHERE user = :1", users.get_current_user())
+                q = db.GqlQuery('SELECT * FROM UserPrefs WHERE user = :1', users.get_current_user())
                 userprefs = q.get()
                 if userprefs:
                     user_name = userprefs.name
                 else: # If the user does not have a preferences object,
                       # redirect them to the user profile page.
                     user_name = users.get_current_user().nickname()
-                    self.redirect("/userprofile")
+                    self.redirect('/userprofile')
                     
                 loginout_url = users.create_logout_url(self.request.uri)
                 url_linktext = 'Logout'
@@ -183,7 +183,7 @@ class StaticContentHandler(webapp.RequestHandler):
         else: # Straight-through content
             self.response.out.write(content.body)
     else:
-        self.response.set_status(304)
+        self.response.set_status(304) # 304 == Not Modified
 
   def get(self, path):
     if not path.startswith(config.url_prefix):
@@ -191,10 +191,9 @@ class StaticContentHandler(webapp.RequestHandler):
         self.error(404)
         self.response.out.write(utils.render_template('404.html'))
         return
-    else:
-      if config.url_prefix != '':
+    elif config.url_prefix:
         path = path[len(config.url_prefix):]# Strip off prefix
-        if path in ROOT_ONLY_FILES:# This lives at root
+        if path in ROOT_ONLY_FILES:# This lives at root (MF: root of what?)
           self.error(404)
           self.response.out.write(utils.render_template('404.html'))
           return
@@ -212,11 +211,11 @@ class StaticContentHandler(webapp.RequestHandler):
             HTTP_DATE_FMT)
         if last_seen >= content.last_modified.replace(microsecond=0):
           serve = False
-      except ValueError, e:
+      except ValueError:
         import logging
-        logging.error('StaticContentHandler in static.py, ValueError:' + self.request.headers['If-Modified-Since'])
+        logging.error('StaticContentHandler in static.py, ValueError:%s' % self.request.headers['If-Modified-Since'])
     if 'If-None-Match' in self.request.headers:
-      etags = [x.strip('" ')
+      etags = [x.strip('\" ')
                for x in self.request.headers['If-None-Match'].split(',')]
       if content.etag in etags:
         serve = False
@@ -226,7 +225,7 @@ class StaticContentHandler(webapp.RequestHandler):
     if path.startswith(('/sitemap.xml','/feeds/')):
         uses_base_template = False
     
-    serve = True; # Added by Tom because WikiBlog is more dynamic than Bloggart.
+    serve = True  # Added by Tom because WikiBlog is more dynamic than Bloggart.
                   # For instance, when redirecting back due to login, we need
                   # the header bar to refresh properly.
     self.output_content(content, serve, uses_base_template)

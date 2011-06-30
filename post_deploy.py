@@ -10,6 +10,8 @@ import static
 import utils
 import generators
 
+# FIXME: Does managing this information as a tuple make sense when it always
+# has to be explcitly separated into its elements across function calls?
 BLOGGART_VERSION = (1, 0, 1)
 
 
@@ -18,7 +20,14 @@ class PostRegenerator(object):
     self.seen = set()
 
   def regenerate(self, batch_size=50, start_ts=None):
+    """
+    TODO: Information on what this function actually does.
+     batch_size = Results to request at a time.
+     start_ts = Maximum date of post to return.
+    """
     q = models.BlogPost.all().order('-published')
+    # Always need to filter out created==datetime.datetime.max as this is used
+    # as a sentinel value for drafts.
     q.filter('published <', start_ts or datetime.datetime.max)
     posts = q.fetch(batch_size)
     for post in posts:
@@ -37,7 +46,14 @@ class PageRegenerator(object):
     self.seen = set()
 
   def regenerate(self, batch_size=50, start_ts=None):
+    """
+    Same functionality as PostRegenerator.regenerate, but for a page.
+     batch_size = Results to request at a time.
+     start_ts = Maximum date of page to return.
+    """
     q = models.Page.all().order('-created')
+    # Always need to filter out created==datetime.datetime.max as this is used
+    # as a sentinel value for drafts.
     q.filter('created <', start_ts or datetime.datetime.max)
     pages = q.fetch(batch_size)
     for page in pages:
@@ -96,8 +112,8 @@ def run_deploy_task():
   task_name = 'deploy-%s' % os.environ['CURRENT_VERSION_ID'].replace('.', '-')
   try:
     deferred.defer(try_post_deploy, _name=task_name, _countdown=10)
-  except (taskqueue.TaskAlreadyExistsError, taskqueue.taskqueue.TombstonedTaskError), e:
-    pass
+  except (taskqueue.TaskAlreadyExistsError, taskqueue.taskqueue.TombstonedTaskError):
+    pass # TODO: How about a comment as to why it's OK to ignore these errors?
 
 
 def try_post_deploy(force=False):

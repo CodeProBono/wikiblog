@@ -33,7 +33,7 @@ class BlogDate(db.Model):
 
   @classmethod
   def datetime_from_key_name(cls, key_name):
-    year, month = key_name.split("/")
+    year, month = key_name.split('/')
     return datetime.datetime(int(year), int(month), 1, tzinfo=utils.tzinfo())
 
   @property
@@ -237,7 +237,7 @@ class TagCounter(db.Model):
     for tag in post.normalized_tags:
       logging.debug('TagCounter.create_for_post in models.py, tag = ' + tag)
       inst = TagCounter.get_by_key_name(key_names=str(tag))
-      if inst is None:
+      if not inst:
         inst = TagCounter(key_name=str(tag), tagname=str(tag), tagcount=0)
       inst.tagcount += 1
       inst.put()

@@ -21,7 +21,7 @@ class UserProfileForm(djangoforms.ModelForm):
 class UserProfileHandler(webapp.RequestHandler):
   def render_form(self, form):
     """ accepts a form, and renders a page containing it. """
-    self.response.out.write(utils.render_template("userprofile.html", {'form': form}, None))
+    self.response.out.write(utils.render_template('userprofile.html', {'form': form}, None))
 
   def get(self):
     """ generates the page with a blank form when it's requested
@@ -37,10 +37,9 @@ class UserProfileHandler(webapp.RequestHandler):
     form = UserProfileForm(data=self.request.POST)
     if form.is_valid():
       user_prefs = form.save(commit=False)
-      #user_prefs = models.UserPrefs(user=users.get_current_user(),name=form.name)
       user_prefs.user = users.get_current_user()
       user_prefs.put()
-      self.redirect("/")
+      self.redirect('/')
     else:
       self.render_form(form)
 

@@ -26,7 +26,7 @@ class PostForm(djangoforms.ModelForm):
   tags = forms.CharField(widget=forms.Textarea(attrs={'rows': 5, 'cols': 20}))
   draft = forms.BooleanField(required=False)
   locked = forms.BooleanField(required=False)
-  class Meta:
+  class Meta: # MF: Where/how is this used?
     model = models.BlogPost
     fields = [ 'title', 'body', 'tags', 'locked' ]
 
@@ -55,7 +55,7 @@ class BaseHandler(webapp.RequestHandler):
     # User must be an admin to reach this handler.
     loginout_url = users.create_logout_url(self.request.uri)
     url_linktext = 'Logout'
-    q = db.GqlQuery("SELECT * FROM UserPrefs WHERE user = :1", users.get_current_user())
+    q = db.GqlQuery('SELECT * FROM UserPrefs WHERE user = :1', users.get_current_user())
     userprefs = q.get()
     user_name = users.get_current_user().nickname() # Default to email if we can't find the user prefs, but this shouldn't actually happen...
     if userprefs:
@@ -69,7 +69,7 @@ class BaseHandler(webapp.RequestHandler):
         'user_name': user_name,
         'url_linktext': url_linktext,
     })
-    template_name = os.path.join("admin", template_name)
+    template_name = os.path.join('admin', template_name)
     self.response.out.write(utils.render_template(template_name, template_vals,
                                                   theme))
 
@@ -88,13 +88,13 @@ class AdminHandler(BaseHandler):
         'next_offset': offset + count,
         'posts': posts,
     }
-    self.render_to_response("index.html", template_vals)
+    self.render_to_response('index.html', template_vals)
 
 
 class PostHandler(BaseHandler):
   def render_form(self, form):
     """ accepts a form, and uses render_to_response to render a page containing the form. """
-    self.render_to_response("edit.html", {'form': form})
+    self.render_to_response('edit.html', {'form': form})
 
   @with_post
   def get(self, post):
@@ -133,7 +133,7 @@ class PostHandler(BaseHandler):
           post.updated = post.published = datetime.datetime.now()
           post.original_author_as_user = users.get_current_user() # Only assign the original user on first save of non-draft post.
           # Find this user's name string
-          q = db.GqlQuery("SELECT * FROM UserPrefs WHERE user = :1", post.original_author_as_user)
+          q = db.GqlQuery('SELECT * FROM UserPrefs WHERE user = :1', post.original_author_as_user)
           userprefs = q.get()
           if userprefs:
             post.original_author_name = userprefs.name # Set user name string for this post.
@@ -141,18 +141,18 @@ class PostHandler(BaseHandler):
         else:# Edit post
           post.updated = datetime.datetime.now()
           # Find this user's name string
-          q = db.GqlQuery("SELECT * FROM UserPrefs WHERE user = :1", users.get_current_user())
+          q = db.GqlQuery('SELECT * FROM UserPrefs WHERE user = :1', users.get_current_user())
           userprefs = q.get()
           # Add additional authors to editors list, provided they aren't the
           # original author, and aren't already in the list.
-          logging.info('PostHandler.post in handlers.py, editors started = ' + str(post.editors))
-          if userprefs and userprefs.name != post.original_author_name:
-            if userprefs.name not in post.editors:
-              post.editors.append( userprefs.name )
-          logging.info('PostHandler.post in handlers.py, editors finished = ' + str(post.editors))
+          logging.info('PostHandler.post in handlers.py, editors started = %s' % str(post.editors))
+          if userprefs and userprefs.name != post.original_author_name \
+                       and userprefs.name not in post.editors:
+            post.editors.append( userprefs.name )
+          logging.info('PostHandler.post in handlers.py, editors finished = %s' % str(post.editors))
         post.put()
         post.publish()
-      self.render_to_response("published.html", {
+      self.render_to_response('published.html', {
           'post': post,
           'draft': form.clean_data['draft']})
     else:
@@ -165,7 +165,7 @@ class DeleteHandler(BaseHandler):
       post.remove()
     else:# Draft
       post.delete()
-    self.render_to_response("deleted.html", None)
+    self.render_to_response('deleted.html', None)
 
 
 class PreviewHandler(BaseHandler):
@@ -187,7 +187,7 @@ class RegenerateHandler(BaseHandler):
     deferred.defer(post_deploy.PostRegenerator().regenerate)
     deferred.defer(post_deploy.PageRegenerator().regenerate)
     deferred.defer(post_deploy.try_post_deploy, force=True)
-    self.render_to_response("regenerating.html")
+    self.render_to_response('regenerating.html')
 
 
 class PageForm(djangoforms.ModelForm):
@@ -208,7 +208,7 @@ class PageForm(djangoforms.ModelForm):
     data = self._cleaned_data()['path']
     existing_page = models.Page.get_by_key_name(data)
     if not data and existing_page:
-      raise forms.ValidationError("The given path already exists.")
+      raise forms.ValidationError('The given path already exists.')
     return data
 
 
@@ -235,8 +235,7 @@ def with_page(fun):
       page = models.Page.get_by_key_name(page_key)
       if not page:
         self.response.headers['Content-Type'] = 'text/plain'
-        self.response.out.write('404 :(\n' + page_key)
-        #self.error(404)
+        self.response.out.write('404 :(\n%s' % page_key)
         return
     fun(self, page)
   return decorate
@@ -244,7 +243,7 @@ def with_page(fun):
 
 class PageHandler(BaseHandler):
   def render_form(self, form):
-    self.render_to_response("editpage.html", {'form': form})
+    self.render_to_response('editpage.html', {'form': form})
 
   @with_page
   def get(self, page):
@@ -273,7 +272,7 @@ class PageHandler(BaseHandler):
       if page.path != oldpath:
         oldpage = models.Page.get_by_key_name(oldpath)
         oldpage.remove()
-      self.render_to_response("publishedpage.html", {'page': page})
+      self.render_to_response('publishedpage.html', {'page': page})
     else:
       self.render_form(form)
 
@@ -282,4 +281,4 @@ class PageDeleteHandler(BaseHandler):
   @with_page
   def post(self, page):
     page.remove()
-    self.render_to_response("deletedpage.html", None)
+    self.render_to_response('deletedpage.html', None)

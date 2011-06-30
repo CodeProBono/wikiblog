@@ -24,17 +24,17 @@ import pygments.util
 def disqus_request(method, request_type=urlfetch.GET, **kwargs):
   kwargs['api_version'] = '1.1'
   if request_type == urlfetch.GET:
-    url = "http://disqus.com/api/%s?%s" % (method, urllib.urlencode(kwargs))
+    url = 'http://disqus.com/api/%s?%s' % (method, urllib.urlencode(kwargs))
     payload = None
   else:
-    url = "http://disqus.com/api/%s/" % (method,)
+    url = 'http://disqus.com/api/%s/' % (method)
     payload = urllib.urlencode(kwargs)
   response = urlfetch.fetch(url, payload, method=request_type)
   if response.status_code != 200:
-    raise Exception("Invalid status code", response.status_code, response.content)
+    raise Exception('Invalid status code', response.status_code, response.content)
   result = simplejson.loads(response.content)
   if not result['succeeded']:
-    raise Exception("RPC did not succeed", result)
+    raise Exception('RPC did not succeed', result)
   return result
   
 
@@ -76,8 +76,8 @@ class BloogBreakingMigration(BaseMigration):
         'request_type': urlfetch.POST,
         'thread_id': thread_id,
         'message': html.strip_tags(comment.body).encode('utf-8'),
-        'author_name': comment.name.encode('utf-8') if comment.name else 'Someone',
-        'author_email': comment.email.encode('utf-8') if comment.email else 'nobody@notdot.net',
+        'author_name': (comment.name or 'Someone').encode('utf-8'),
+        'author_email': (comment.email or 'nobody@notdot.net').encode('utf-8'),
         'forum_api_key': self.forum_key,
         'created_at': comment.published.strftime('%Y-%m-%dT%H:%M'),
     }
@@ -103,7 +103,7 @@ class BloogBreakingMigration(BaseMigration):
         request_type=urlfetch.POST,
         forum_api_key=self.forum_key,
         thread_id=thread_id,
-        url="http://%s%s" % (config.host, article_key.name()))
+        url='http://%s%s' % (config.host, article_key.name()))
     q = BloogBreakingMigration.Comment.all(keys_only=True)
     q.ancestor(article_key)
     # Get a list of IDs of comments
@@ -137,7 +137,7 @@ class BloogBreakingMigration(BaseMigration):
     if len(articles) == batch_size:
       deferred.defer(self.migrate_all, batch_size, articles[-1].key())
     else:
-      logging.warn("Migration finished; starting rebuild.")
+      logging.warn('Migration finished; starting rebuild.')
       regen = post_deploy.PostRegenerator()
       deferred.defer(regen.regenerate)
 
@@ -161,9 +161,7 @@ class WordpressMigration(BaseMigration):
     if ns is not None:
       tag = '{%s}%s' % (ns, tag)
     item = node.find(tag)
-    if item is not None:
-      return item.text
-    return ''
+    return item.text or ''
 
   @classmethod
   def _expand_wp_tags(cls, content):
@@ -174,13 +172,13 @@ class WordpressMigration(BaseMigration):
   @classmethod
   def _expand_caption_tag(cls, content):
     # FIXME: Is the below regex really meant to take a raw string? Me thinks not.
-    content = re.sub(r'\[caption[^\]]*\]', '<div class="image">', content)
+    content = re.sub(r'\[caption[^\]]*\]', '<div class=\"image\">', content)
     content = content.replace('[/caption]', '</div>')
     return content
 
   @classmethod
   def _expand_sourcecode_tag(cls, content):
-    p_bgn = re.compile('\[sourcecode( language="(?P<lang>[a-z]+)")?\]',
+    p_bgn = re.compile('\[sourcecode( language=\"(?P<lang>[a-z]+)\")?\]',
                        re.IGNORECASE|re.MULTILINE|re.UNICODE|re.DOTALL)
     p_end = re.compile('\[/sourcecode\]',
                        re.IGNORECASE|re.MULTILINE|re.UNICODE|re.DOTALL)
@@ -189,12 +187,12 @@ class WordpressMigration(BaseMigration):
       new_content = []
       bgnidx = match.start()
       m_end = p_end.search(content[match.end():])
-      if m_end is None:
+      if not m_end:
         return content
       new_content.append(content[:match.start()])
       scode = content[match.end():m_end.start()+match.end()]
       lang = match.groupdict().get('lang')
-      if lang is not None:
+      if lang:
         formatter = pygments.formatters.get_formatter_by_name('html')
         try:
           lexer = pygments.lexers.get_lexer_by_name(lang)
@@ -238,7 +236,7 @@ class WordpressMigration(BaseMigration):
         request_type=urlfetch.POST,
         forum_api_key=self.forum_key,
         thread_id=thread_id,
-        url="http://%s%s" % (config.host, post_path))
+        url='http://%s%s' % (config.host, post_path))
     for comment in wp_comments[0]:
       deferred.defer(self.migrate_one_comment, comment, thread_id,
                      wp_comments)
@@ -329,7 +327,7 @@ class WordpressMigration(BaseMigration):
                               ns=self.ns_wordpress) == 'post']
 
   def migrate_all(self, batch_size=20, items=None):
-    if items is None:
+    if not items:
       items = self._get_posts()
     logging.warn('Start processing of %d items', len(items))
     for item in items[:batch_size]:
@@ -337,7 +335,7 @@ class WordpressMigration(BaseMigration):
     if items[batch_size:]:
       deferred.defer(self.migrate_all, batch_size, items[batch_size:])
     else:
-      logging.warn("Migration finished; starting rebuild.")
+      logging.warn('Migration finished; starting rebuild.')
       regen = post_deploy.PostRegenerator()
       deferred.defer(regen.regenerate)
 

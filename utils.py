@@ -36,7 +36,7 @@ def format_post_path(post, num):
   formats the URL using the format string defined in the config file. """
   slug = slugify(post.title)
   if num > 0:
-    slug += "-" + str(num)
+    slug += '-%s' % str(num)
   date = post.published_tz
   return config.post_path_format % {
       'slug': slug,
@@ -47,7 +47,7 @@ def format_post_path(post, num):
 
 
 def get_template_vals_defaults(template_vals=None):
-  if template_vals is None:
+  if not template_vals:
     template_vals = {}
   template_vals.update({
       'config': config,
@@ -101,10 +101,10 @@ def _regenerate_sitemap():
 def ping_googlesitemap():
   import urllib
   from google.appengine.api import urlfetch
-  google_url = 'http://www.google.com/webmasters/tools/ping?sitemap=http://' + config.host + '/sitemap.xml.gz'
+  google_url = 'http://www.google.com/webmasters/tools/ping?sitemap=http://%s/sitemap.xml.gz' % config.host
   response = urlfetch.fetch(google_url, '', urlfetch.GET)
   if response.status_code not in range(200, 300):
-    raise Warning("Google Sitemap ping failed", response.status_code, response.content)
+    raise Warning('Google Sitemap ping failed', response.status_code, response.content)
 
 def tzinfo():
   """
@@ -116,7 +116,7 @@ def tzinfo():
     return None
 
   str = config.tzinfo_class
-  i = str.rfind(".")
+  i = str.rfind('.')
 
   try:
     # from str[:i] import str[i+1:]

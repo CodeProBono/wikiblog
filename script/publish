@@ -70,13 +70,13 @@ if not static.add(path, '', config.html_mime_type):
 		post.tags = tags
         post.published = published
 	else:
-		sys.exit("error: content exists on path %s, use -f to force update" % path)
+		sys.exit('error: content exists on path %s, use -f to force update' % path)
 
 static.get(path).delete()
 post.put()
 post.publish()
 
-draftpath = '/draft/'+ utils.slugify(title)
+draftpath = '/draft/%s' % utils.slugify(title)
 draft = static.get(draftpath)
 if draft:
 	draft.delete()

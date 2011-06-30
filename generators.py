@@ -121,11 +121,11 @@ class PostContentGenerator(ContentGenerator):
     template_vals = {'post': post}
    
     prev, next = cls.get_prev_next(post)
-    if prev is not None:
+    if prev:
       template_vals['prev']=prev
-    if next is not None:
+    if next:
       template_vals['next']=next
-    rendered = utils.render_template("post.html", template_vals)
+    rendered = utils.render_template('post.html', template_vals)
     static.set(post.path, rendered, config.html_mime_type)
 generator_list.append(PostContentGenerator)
 
@@ -142,7 +142,7 @@ class PostPrevNextContentGenerator(PostContentGenerator):
   def generate_resource(cls, post, resource):
     import models
     post = models.BlogPost.get_by_id(resource)
-    if post is None:
+    if not post:
       return
      
     template_vals = {
@@ -150,9 +150,9 @@ class PostPrevNextContentGenerator(PostContentGenerator):
     }
     
     prev, next = cls.get_prev_next(post)
-    if prev is not None:
+    if prev:
      template_vals['prev']=prev
-    if next is not None:
+    if next:
      template_vals['next']=next
     rendered = utils.render_template("post.html", template_vals)
     static.set(post.path, rendered, config.html_mime_type)
@@ -216,7 +216,7 @@ class ListingContentGenerator(ContentGenerator):
         'next_page': next_page if more_posts else None,
     }
     
-    rendered = utils.render_template("listing.html", template_vals)
+    rendered = utils.render_template('listing.html', template_vals)
 
     path_args['pagenum'] = pagenum
     static.set(_get_path() % path_args, rendered, config.html_mime_type)
@@ -234,7 +234,7 @@ class IndexContentGenerator(ListingContentGenerator):
   @classmethod
   def get_resource_list(cls, post):
     """ The only IndexContent that depends on this post is the index itself. """
-    return ["index"]
+    return ['index']
 generator_list.append(IndexContentGenerator)
 
 
@@ -296,7 +296,7 @@ class ArchiveIndexContentGenerator(ContentGenerator):
 
   @classmethod
   def get_resource_list(cls, post):
-    return ["archive"]
+    return ['archive']
 
   @classmethod
   def get_etag(cls, post):
@@ -312,7 +312,7 @@ class ArchiveIndexContentGenerator(ContentGenerator):
     for date in dates:
       date_struct.setdefault(date.year, []).append(date)
       
-    str = utils.render_template("archive.html", {
+    str = utils.render_template('archive.html', {
       'generator_class': cls.__name__,
       'dates': dates,
       'date_struct': date_struct.values(),
@@ -326,7 +326,7 @@ class AtomContentGenerator(ContentGenerator):
 
   @classmethod
   def get_resource_list(cls, post):
-    return ["atom"]
+    return ['atom']
 
   @classmethod
   def get_etag(cls, post):
@@ -344,7 +344,7 @@ class AtomContentGenerator(ContentGenerator):
         'updated': now,
     }
     
-    rendered = utils.render_template("atom.xml", template_vals)
+    rendered = utils.render_template('atom.xml', template_vals)
     static.set('/feeds/atom.xml', rendered,
                'application/atom+xml; charset=utf-8', indexed=False,
                last_modified=now)
@@ -358,8 +358,8 @@ class AtomContentGenerator(ContentGenerator):
         'hub.mode': 'publish',
     })
     response = urlfetch.fetch(hub_url, data, urlfetch.POST)
-    if response.status_code / 100 != 2:
-      raise Exception("Hub ping failed", response.status_code, response.content)
+    if response.status_code not in range(200, 300):
+      raise Exception('Hub ping failed', response.status_code, response.content)
 generator_list.append(AtomContentGenerator)
 
 class PageContentGenerator(ContentGenerator):
@@ -407,7 +407,7 @@ class TagCloudContentGenerator(ContentGenerator):
     for tag in post.normalized_tags:
       logging.debug('TagCloudContentGenerator.generate_resource in generators.py, tag = ' + tag)
       tag_counter = models.TagCounter.get_by_key_name( key_names=str(tag) )
-      if tag_counter is None:
+      if not tag_counter:
         tag_counter = models.TagCounter(key_name=str(tag), tagname=str(tag), tagcount=0)
       tag_counter.tagcount += 1
       tag_counter.put()
@@ -434,7 +434,7 @@ class TagCloudContentGenerator(ContentGenerator):
     template_vals = {
       'tagcloud': tagcloud,
     }    
-    rendered = utils.render_template("tagcloud.html", template_vals)
+    rendered = utils.render_template('tagcloud.html', template_vals)
     
     # Store the tagcloud HTML in the static store undrthe path 'tagcloud'.
     static.set('tagcloud', rendered, config.html_mime_type, indexed=False)

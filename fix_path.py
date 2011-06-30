@@ -8,7 +8,7 @@ ultimate_sys_path = None
 
 def fix_sys_path():
     global ultimate_sys_path
-    if ultimate_sys_path is None:
+    if not ultimate_sys_path:
         ultimate_sys_path = list(sys.path)
     else:
         sys.path[:] = ultimate_sys_path
