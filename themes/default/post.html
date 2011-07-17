@@ -20,7 +20,7 @@
     {% if post.locked %}
       | Locked
     {% else %}
-      | <a href="{{config.url_prefix}}/admin/post/{{post.key.id}}">Edit Post</a>
+      | <a href="{{config.url_prefix}}/user/post/{{post.key.id}}">Edit Post</a>
     {% endif %}
   </p>
   {% if prev %}

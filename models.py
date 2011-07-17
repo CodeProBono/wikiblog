@@ -68,6 +68,9 @@ class BlogPost(db.Model):
   @aetycoon.TransformProperty(tags)
   def normalized_tags(tags):
     return list(set(utils.slugify(x.lower()) for x in tags))
+  
+  def normalized_original_author_name(self):
+    return utils.slugify(original_author_name.lower())
 
   @property
   def tag_pairs(self):
@@ -245,3 +248,22 @@ class TagCounter(db.Model):
 class UserPrefs(db.Model):
   user = db.UserProperty()
   name = db.StringProperty()
+  postscount = db.IntegerProperty(required=True, default=0)
+  namepath = db.StringProperty() # Unique URL path made from name + a number if necessary.
+
+  @property
+  def name_and_count(self):
+    return (namepath, self.postscount)
+
+  def publish(self):
+    if not self.namepath:
+      num = 0
+      content = None
+      while not content:
+        """ Tries to find a unique URL for this user, and adds the content
+        to the datastore when it finds one. """
+        path = utils.format_user_path(self, num)
+        content = static.add(path, '', config.html_mime_type)
+        num += 1
+      self.namepath = path
+      self.put()

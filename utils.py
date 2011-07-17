@@ -45,6 +45,16 @@ def format_post_path(post, num):
       'day': date.day,
   }
 
+def format_user_path(user, num):
+  """ generates the path component of a URL for the user:
+  It slugifies the user's name, optionally appends a unique number, and then
+  formats the URL using the format string defined in the config file. """
+  slug = slugify(user.name)
+  if num > 0:
+    slug += "-" + str(num)
+  return '/%(slug)s' % {
+      'slug': slug
+  }
 
 def get_template_vals_defaults(template_vals=None):
   if not template_vals:

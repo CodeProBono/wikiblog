@@ -50,7 +50,7 @@ disqus_forum = "jugglethis-wikiblog"
 summary_length = 200
 
 # If you want to use Google Analytics, enter your 'web property id' here
-analytics_id = 'UA-23680950'
+analytics_id = 'UA-23680950-1'
 
 # If you want to use PubSubHubbub, supply the hub URL to use here.
 hubbub_hub_url = 'http://pubsubhubbub.appspot.com/'

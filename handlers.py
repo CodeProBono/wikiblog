@@ -30,9 +30,6 @@ class PostForm(djangoforms.ModelForm):
     model = models.BlogPost
     fields = [ 'title', 'body', 'tags', 'locked' ]
 
-class UserProfileForm(djangoforms.ModelForm):
-  name = forms.CharField(widget=forms.TextInput(attrs={'id':'name'}))
-
 def with_post(fun):
   """ Decorator function that attaches to methods that require an optional
   post ID. Loads the relevant BlogPost object. """
@@ -152,9 +149,10 @@ class PostHandler(BaseHandler):
           logging.info('PostHandler.post in handlers.py, editors finished = %s' % str(post.editors))
         post.put()
         post.publish()
-      self.render_to_response('published.html', {
-          'post': post,
-          'draft': form.clean_data['draft']})
+        logging.info('PostHandler.post in handlers.py, post.path = ' + str(post.path))
+      self.render_to_response("published.html", {
+        'post': post,
+        'draft': form.clean_data['draft']})
     else:
       self.render_form(form)
 
