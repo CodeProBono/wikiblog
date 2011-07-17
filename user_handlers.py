@@ -155,7 +155,7 @@ class PostHandler(BaseHandler):
           post.original_author_name = userprefs.name # Set user name string for this post.
         else:
           post.original_author_name = "Anonymous" # Change original author name to "Anonymous"
-        logging.info('PostHandler.post in handlers.py, original_author_name = ' + str(post.original_author_name))
+        logging.info('PostHandler.post in user_handlers.py, original_author_name = ' + str(post.original_author_name))
       else:# Edit post
         post.updated = datetime.datetime.now()
         # Find this user's name string
@@ -163,7 +163,7 @@ class PostHandler(BaseHandler):
         userprefs = q.get()
         # Add additional authors to editors list, provided they aren't the
         # original author, and aren't already in the list.
-        logging.info('PostHandler.post in handlers.py, editors started = ' + str(post.editors))
+        logging.info('PostHandler.post in user_handlers.py, editors started = ' + str(post.editors))
         if userprefs:
           if userprefs.name != post.original_author_name: # If edited by someone not the original author
             editor_name = userprefs.name
@@ -180,10 +180,11 @@ class PostHandler(BaseHandler):
           else: # If being edited by the original author
             if form._cleaned_data()['anonymous']: # If user asked to be anonymous
               post.original_author_name = "Anonymous" # Change original author name to "Anonymous"
-        logging.info('PostHandler.post in handlers.py, editors finished = ' + str(post.editors))
-        
-        post.put()
-        post.publish()
+        logging.info('PostHandler.post in user_handlers.py, editors finished = ' + str(post.editors))
+      
+      post.put()
+      post.publish()
+      logging.info('PostHandler.post in user_handlers.py, post.path = ' + str(post.path))
       self.render_to_response("published.html", {
           'post': post})
     else:

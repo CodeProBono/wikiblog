@@ -149,6 +149,7 @@ class PostHandler(BaseHandler):
           logging.info('PostHandler.post in handlers.py, editors finished = ' + str(post.editors))
         post.put()
         post.publish()
+        logging.info('PostHandler.post in handlers.py, post.path = ' + str(post.path))
       self.render_to_response("published.html", {
           'post': post,
           'draft': form.clean_data['draft']})
