@@ -227,7 +227,7 @@ class StaticContentHandler(webapp.RequestHandler):
 
     # Check whether the output should simply pass straight through, rather than via the base.html template.        
     uses_base_template = True
-    if path.startswith(('/sitemap.xml','/feeds/')):
+    if path.startswith(('/sitemap.xml','/feeds/','/search','/cse')):
         uses_base_template = False
     
     self.output_content(content, serve, uses_base_template)

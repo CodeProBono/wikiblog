@@ -444,7 +444,7 @@ class AuthorsContentGenerator(ListingContentGenerator):
   """ContentGenerator for the authors pages."""
 
   path = '/author/%(resource)s/%(pagenum)d'
-  first_page_path = '/tag/%(resource)s'
+  first_page_path = '/author/%(resource)s'
 
   @classmethod
   def get_resource_list(cls, post):

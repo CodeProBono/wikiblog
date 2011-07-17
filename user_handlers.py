@@ -10,6 +10,7 @@ import markup
 import models
 import post_deploy
 import utils
+import logging
 
 from django import newforms as forms
 from google.appengine.ext.db import djangoforms
@@ -30,7 +31,16 @@ class UserProfileHandler(webapp.RequestHandler):
   def get(self):
     """ generates the page with a blank form when it's requested
     by the user's browser with a GET request."""
-    self.render_form(UserProfileForm(data=self.request.POST))
+    # If there's a current user logged in, pre-fill the form with
+    # this user's details.
+    from google.appengine.ext import db
+    q = db.GqlQuery("SELECT * FROM UserPrefs WHERE user = :1", users.get_current_user())
+    if q.get():
+      initial_data = {'name': q.get().name}
+      logging.info('UserProfileHandler.get in user_handlers.py, initial_data = ' + str(initial_data))
+      self.render_form(UserProfileForm(instance=q.get(),initial=initial_data))
+    else:
+      self.render_form(UserProfileForm(data=self.request.POST))
 
   def post(self):
     """ accepts form submissions and checks them for validity.
@@ -41,8 +51,8 @@ class UserProfileHandler(webapp.RequestHandler):
     form = UserProfileForm(data=self.request.POST)
     if form.is_valid():
       user_prefs = form.save(commit=False)
-      #user_prefs = models.UserPrefs(user=users.get_current_user(),name=form.name)
       user_prefs.user = users.get_current_user()
+      user_prefs.publish() # Publish finds a unique URL path for this user's author page.
       user_prefs.put()
       self.redirect("/")
     else:
