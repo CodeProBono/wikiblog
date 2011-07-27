@@ -12,7 +12,11 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import users
 
 import fix_path
+
+# If your app fails to import aetycoon during development testing, you have
+# most likely forgotten to init and update git submodules.
 import aetycoon
+
 import config
 import utils
 import models
