@@ -11,24 +11,24 @@ post_deploy.run_deploy_task()
 
 
 application = webapp.WSGIApplication([
-  (config.url_prefix + '/admin/', handlers.AdminHandler),
-  (config.url_prefix + '/admin/posts', handlers.AdminHandler), # Lists all posts in admin interface
-  (config.url_prefix + '/admin/pages', handlers.PageAdminHandler), # Lists all pages in admin interface
-  (config.url_prefix + '/admin/newpost', handlers.PostHandler), # Write a new post.
-  (config.url_prefix + '/admin/post/(\d+)', handlers.PostHandler), # Add or edit a post given its key
-  (config.url_prefix + '/admin/regenerate', handlers.RegenerateHandler), # Regenerate all content.
-  (config.url_prefix + '/admin/post/delete/(\d+)', handlers.DeleteHandler),
-  (config.url_prefix + '/admin/post/preview/(\d+)', handlers.PreviewHandler),
-  (config.url_prefix + '/admin/newpage', handlers.PageHandler), # Write a new page.
-  (config.url_prefix + '/admin/page/delete/(/.*)', handlers.PageDeleteHandler),
-  (config.url_prefix + '/admin/page/(/.*)', handlers.PageHandler),
+    (config.url_prefix + '/admin/', handlers.AdminHandler),
+    (config.url_prefix + '/admin/posts', handlers.AdminHandler), # Lists all posts in admin interface
+    (config.url_prefix + '/admin/pages', handlers.PageAdminHandler), # Lists all pages in admin interface
+    (config.url_prefix + '/admin/newpost', handlers.PostHandler), # Write a new post.
+    (config.url_prefix + '/admin/post/(\d+)', handlers.PostHandler), # Add or edit a post given its key
+    (config.url_prefix + '/admin/regenerate', handlers.RegenerateHandler), # Regenerate all content.
+    (config.url_prefix + '/admin/post/delete/(\d+)', handlers.DeleteHandler),
+    (config.url_prefix + '/admin/post/preview/(\d+)', handlers.PreviewHandler),
+    (config.url_prefix + '/admin/newpage', handlers.PageHandler), # Write a new page.
+    (config.url_prefix + '/admin/page/delete/(/.*)', handlers.PageDeleteHandler),
+    (config.url_prefix + '/admin/page/(/.*)', handlers.PageHandler),
 ])
 
 
 def main():
-  fix_path.fix_sys_path()
-  run_wsgi_app(application)
+    fix_path.fix_sys_path()
+    run_wsgi_app(application)
 
 
 if __name__ == '__main__':
-  main()
+    main()
